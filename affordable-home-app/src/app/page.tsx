@@ -33,14 +33,14 @@ export default function Home() {
               <p style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 480, color: '#6B6B6B', marginBottom: 32 }}>
                 We make it simple to discover affordable homes and housing programs in Essex County, NJ that fit your household and budget.
               </p>
-              <button style={{ backgroundColor: '#1A1A1A', color: '#FFFFFF', padding: '14px 24px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button>
+              <button style={{ backgroundColor: '#1D6B4A', color: '#FFFFFF', padding: '14px 24px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button>
             </div>
             <div className="flex-1" style={{ width: '100%', minHeight: 480 }}>
               <img src="/MontclairEstates-1.jpg.webp" alt="Essex County apartment building" className="w-full h-full object-cover rounded-2xl shadow-lg" style={{ minHeight: '480px' }} />
             </div>
           </div>
         </section>
-
+        <div style={{ height: 1, backgroundColor: '#1D6B4A', margin: '0 32px' }} />
         <section style={{ backgroundColor: '#F5F2ED', borderTop: '1px solid #E0DDD8', borderBottom: '1px solid #E0DDD8', padding: '80px 32px' }}>
           <div className="mx-auto grid grid-cols-1 md:grid-cols-4 gap-8" style={{ maxWidth: 1100 }}>
             <div className="flex flex-col items-center text-center gap-3">
