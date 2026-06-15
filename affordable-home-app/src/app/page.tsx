@@ -150,7 +150,6 @@ export default function Home() {
           <div className="mx-auto" style={{ maxWidth: 800 }}>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 42, color: '#FFFFFF', marginBottom: 16 }}>Your home is out there.</h2>
             <p style={{ color: '#D1D5DB', fontSize: 16, lineHeight: 1.8, marginBottom: 32 }}>Affordable Home connects Essex County families to housing they qualify for. Free, always. No account required.</p>
-            <a href='/wizard'><button style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', padding: '16px 32px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button></a>
           </div>
         </section>
       </main>
