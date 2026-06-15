@@ -33,7 +33,9 @@ export default function Home() {
               <p style={{ fontSize: 16, lineHeight: 1.75, maxWidth: 480, color: '#6B6B6B', marginBottom: 32 }}>
                 We make it simple to discover affordable homes and housing programs in Essex County, NJ that fit your household and budget.
               </p>
-              <button style={{ backgroundColor: '#1D6B4A', color: '#FFFFFF', padding: '14px 24px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button>
+              <a href="/wizard" style={{ backgroundColor: '#1D6B4A', color: '#FFFFFF', padding: '14px 24px', borderRadius: 16, fontSize: 14, fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                Get Started →
+              </a>
             </div>
             <div className="flex-1" style={{ width: '100%', minHeight: 480 }}>
               <img src="/MontclairEstates-1.jpg.webp" alt="Essex County apartment building" className="w-full h-full object-cover rounded-2xl shadow-lg" style={{ minHeight: '480px' }} />
@@ -148,7 +150,7 @@ export default function Home() {
           <div className="mx-auto" style={{ maxWidth: 800 }}>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 42, color: '#FFFFFF', marginBottom: 16 }}>Your home is out there.</h2>
             <p style={{ color: '#D1D5DB', fontSize: 16, lineHeight: 1.8, marginBottom: 32 }}>Affordable Home connects Essex County families to housing they qualify for. Free, always. No account required.</p>
-            <button style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', padding: '16px 32px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button>
+            <a href='/wizard'><button style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A', padding: '16px 32px', borderRadius: 16, fontSize: 14, fontWeight: 500 }}>Get Started →</button></a>
           </div>
         </section>
       </main>
