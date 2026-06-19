@@ -7,7 +7,7 @@ const availabilityOptions = ['All', 'Open', 'Waitlist'];
 const bedroomOptions = ['All', 'Studio', '1BR', '2BR', '3BR+'];
 const amiOptions = ['All', '30%', '50%', '60%', '80%'];
 
-function formatRent(rent) {
+function formatRent(rent: number | null | undefined) {
   if (rent == null || rent === 0) return 'Contact for rent';
   if (typeof rent === 'number') {
     return new Intl.NumberFormat('en-US', {
