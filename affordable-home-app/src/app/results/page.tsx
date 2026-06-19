@@ -26,7 +26,7 @@ function formatRent(rent: number | null | undefined) {
   return normalized;
 }
 
-function availabilityBadge(waitlistOpen) {
+function availabilityBadge(waitlistOpen: boolean | string | null | undefined) {
   const isOpen = waitlistOpen === false || String(waitlistOpen) === 'false';
   return {
     label: isOpen ? 'Open' : 'Waitlist',
@@ -36,9 +36,9 @@ function availabilityBadge(waitlistOpen) {
 }
 
 export default function ResultsPage() {
-  const [listings, setListings] = useState([]);
+  const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [availability, setAvailability] = useState('All');
   const [bedrooms, setBedrooms] = useState('All');
   const [ami, setAmi] = useState('All');
