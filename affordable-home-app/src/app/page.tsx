@@ -34,14 +34,14 @@ export default function Home() {
           borderBottom: '1px solid rgba(255,255,255,0.07)',
         }}
       >
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(16px, 4vw, 32px)', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em' }}>Affordable Home</span>
           </div>
-          <nav style={{ display: 'flex', gap: 32, fontSize: 14, fontWeight: 500 }}>
+          <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 500, flexWrap: 'wrap' }}>
             <a href="/results" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>Browse Listings</a>
             <a href="#how" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>How it works</a>
             <a href="#coverage" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }}>Coverage</a>
@@ -53,7 +53,7 @@ export default function Home() {
       </motion.header>
 
       {/* HERO */}
-      <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 48px 100px', overflow: 'hidden' }}>
+      <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 clamp(20px, 5vw, 48px) clamp(60px, 8vw, 100px)', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', backgroundAttachment: 'fixed', filter: 'brightness(0.38)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,22,40,0.97) 0%, rgba(10,22,40,0.35) 60%, rgba(10,22,40,0.15) 100%)' }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', width: '100%' }}>
@@ -85,7 +85,7 @@ export default function Home() {
       </section>
 
       {/* STATS BAR */}
-      <section style={{ backgroundColor: '#0A1628', padding: '40px 48px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ backgroundColor: '#0A1628', padding: 'clamp(24px, 4vw, 40px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 64, flexWrap: 'wrap' }}>
           {[{ n: '25+', label: 'Verified listings' }, { n: '22', label: 'Municipalities covered' }, { n: '100%', label: 'Free, always' }, { n: '0', label: 'Accounts required' }].map((s, i) => (
             <FadeUp key={s.label} delay={i * 0.08}>
@@ -99,7 +99,7 @@ export default function Home() {
       </section>
 
       {/* WHAT YOU'LL FIND - light */}
-      <section style={{ backgroundColor: '#FFFFFF', padding: '120px 48px' }}>
+      <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>What you'll find</p>
@@ -126,7 +126,7 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS - dark */}
-      <section id="how" style={{ backgroundColor: '#0A1628', padding: '120px 48px' }}>
+      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#93C5FD', marginBottom: 16 }}>How it works</p>
@@ -154,7 +154,7 @@ export default function Home() {
       </section>
 
       {/* WHY AFFORDABLE HOME - light */}
-      <section style={{ backgroundColor: '#F8FAFC', padding: '120px 48px' }}>
+      <section style={{ backgroundColor: '#F8FAFC', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>Why Affordable Home</p>
@@ -186,7 +186,7 @@ export default function Home() {
       </section>
 
       {/* COVERAGE - light */}
-      <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: '120px 48px' }}>
+      <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>Coverage</p>
@@ -205,7 +205,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor: '#0A1628', padding: '40px 48px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ backgroundColor: '#0A1628', padding: 'clamp(24px, 4vw, 40px) clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>2025 Affordable Home · Essex County, NJ</p>
           <div style={{ display: 'flex', gap: 24 }}>

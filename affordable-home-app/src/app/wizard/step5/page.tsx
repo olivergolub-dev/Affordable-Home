@@ -10,7 +10,7 @@ export default function WizardStep5() {
   const [selected, setSelected] = useState<string | null>(null);
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 32px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(40px, 7vw, 80px) clamp(16px, 4vw, 32px)' }}>
         <div style={{ marginBottom: 48 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

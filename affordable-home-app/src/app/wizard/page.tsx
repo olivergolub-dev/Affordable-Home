@@ -15,7 +15,7 @@ export default function WizardStep1() {
   const router = useRouter();
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 32px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(40px, 7vw, 80px) clamp(16px, 4vw, 32px)' }}>
         <div style={{ marginBottom: 48 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#1E40AF' }}>Step 1 of 7</span>
