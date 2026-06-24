@@ -268,29 +268,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA - photo background again */}
-      <section style={{ position: 'relative', padding: '140px 48px', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'url(/hero.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 60%',
-          filter: 'brightness(0.3)',
-        }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,22,40,0.7)' }} />
-        <FadeUp>
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: 800 }}>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2.5rem, 6vw, 5.5rem)', lineHeight: 0.95, color: '#FFFFFF', marginBottom: 32 }}>
-              Your home<br />is out there.
-            </h2>
-            <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', marginBottom: 40, lineHeight: 1.7 }}>Five minutes from now, you could have a real list of places to apply.</p>
-            <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '18px 40px', borderRadius: 8, fontSize: 16, fontWeight: 700, textDecoration: 'none', display: 'inline-block' }}>
-              Start the eligibility check →
-            </a>
-          </div>
-        </FadeUp>
-      </section>
-
       {/* FOOTER */}
       <footer style={{ backgroundColor: '#0A1628', padding: '40px 48px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
