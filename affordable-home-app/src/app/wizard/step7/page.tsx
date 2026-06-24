@@ -61,7 +61,7 @@ export default function WizardStep7() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr]">
           <button
             type="button"
-            onClick={() => router.push('/results')}
+            onClick={() => { sessionStorage.setItem("wizard_email", email); router.push('/results'); }}
             className="w-full rounded-3xl px-6 py-5"
             style={{
               backgroundColor: '#FFFFFF',
@@ -75,7 +75,7 @@ export default function WizardStep7() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/results')}
+            onClick={() => { sessionStorage.setItem("wizard_email", email); router.push('/results'); }}
             className="w-full rounded-3xl px-6 py-5"
             style={{
               backgroundColor: '#1D6B4A',

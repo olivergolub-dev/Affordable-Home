@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function WizardStep2() {
   const router = useRouter();
+  const [income, setIncome] = useState("");
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F5F0' }}>
@@ -45,6 +47,8 @@ export default function WizardStep2() {
             type="text"
             inputMode="numeric"
             placeholder="$0"
+            value={income}
+            onChange={(e) => setIncome(e.target.value)}
             className="w-full rounded-[28px] px-6 py-5"
             style={{
               border: '1px solid #E0DDD8',
@@ -57,7 +61,7 @@ export default function WizardStep2() {
 
           <button
             type="button"
-            onClick={() => router.push('/wizard/step3')}
+            onClick={() => { sessionStorage.setItem("wizard_income", income); router.push('/wizard/step3'); }}
             className="mt-8 w-full rounded-3xl px-6 py-5"
             style={{
               backgroundColor: '#1D6B4A',

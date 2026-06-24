@@ -90,7 +90,7 @@ export default function WizardStep6() {
 
         <button
           type="button"
-          onClick={() => router.push('/wizard/step7')}
+          onClick={() => { sessionStorage.setItem("wizard_circumstances", JSON.stringify(selected)); router.push('/wizard/step7'); }}
           className="w-full rounded-3xl px-6 py-5"
           style={{
             backgroundColor: '#1D6B4A',

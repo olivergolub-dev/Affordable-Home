@@ -80,7 +80,7 @@ export default function WizardStep5() {
 
         <button
           type="button"
-          onClick={() => router.push('/wizard/step6')}
+          onClick={() => { sessionStorage.setItem("wizard_voucher", selected || ""); router.push('/wizard/step6'); }}
           className="w-full rounded-3xl px-6 py-5"
           style={{
             backgroundColor: '#1D6B4A',

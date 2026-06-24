@@ -162,7 +162,7 @@ export default function WizardStep4() {
 
         <button
           type="button"
-          onClick={() => router.push('/wizard/step5')}
+          onClick={() => { sessionStorage.setItem("wizard_towns", JSON.stringify(selectedTowns)); router.push('/wizard/step5'); }}
           className="w-full rounded-3xl px-6 py-5"
           style={{
             backgroundColor: '#1D6B4A',

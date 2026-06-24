@@ -43,6 +43,19 @@ export default function ResultsPage() {
   const [bedrooms, setBedrooms] = useState('All');
   const [ami, setAmi] = useState('All');
 
+  // Read wizard answers from sessionStorage
+  const [wizardAnswers, setWizardAnswers] = useState<any>({});
+  useEffect(() => {
+    const answers = {
+      income: sessionStorage.getItem('wizard_income') || '',
+      householdSize: JSON.parse(sessionStorage.getItem('wizard_household_size') || '[]'),
+      towns: JSON.parse(sessionStorage.getItem('wizard_towns') || '[]'),
+      voucher: sessionStorage.getItem('wizard_voucher') || '',
+      circumstances: JSON.parse(sessionStorage.getItem('wizard_circumstances') || '[]'),
+    };
+    setWizardAnswers(answers);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -72,9 +85,31 @@ export default function ResultsPage() {
     };
   }, []);
 
+  // Calculate AMI tier from income
+  const getAmiTier = (incomeStr: string) => {
+    const income = parseInt(incomeStr.replace(/[^0-9]/g, ''));
+    if (!income) return null;
+    if (income <= 30450) return '30%';
+    if (income <= 50750) return '50%';
+    if (income <= 60900) return '60%';
+    if (income <= 81200) return '80%';
+    return null;
+  };
+
   const filteredListings = useMemo(() => {
+    const userAmiTier = getAmiTier(wizardAnswers.income || '');
+    const userTowns: string[] = wizardAnswers.towns || [];
     return listings.filter((listing) => {
       const waitlistOpen = listing.wailist_open === true || String(listing.wailist_open) === 'true';
+      // Filter by town if user selected specific towns
+      const townMatch = userTowns.length === 0 || 
+        userTowns.some((t: string) => t.toLowerCase() === 'any essex county municipality') ||
+        userTowns.some((t: string) => listing.city?.toLowerCase().includes(t.toLowerCase()));
+
+      // Filter by AMI tier if we can calculate it
+      const amiMatch = !userAmiTier || !listing.ami_band || 
+        listing.ami_band.includes(userAmiTier) || ami !== 'All';
+
       const availabilityMatch =
         availability === 'All' ||
         (availability === 'Open' && waitlistOpen === false) ||
@@ -82,9 +117,7 @@ export default function ResultsPage() {
 
       const bedroomsMatch = bedrooms === 'All' || String(listing.bedrooms) === bedrooms;
 
-      const normalizedAmi = String(listing.ami_band ?? '').replace('%', '').trim();
-      const selectedAmi = ami === 'All' ? '' : ami.replace('%', '');
-      const amiMatch = ami === 'All' || normalizedAmi === selectedAmi;
+
 
       return availabilityMatch && bedroomsMatch && amiMatch;
     });

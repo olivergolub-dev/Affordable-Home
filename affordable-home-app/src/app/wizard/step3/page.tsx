@@ -80,7 +80,7 @@ export default function WizardStep3() {
 
         <button
           type="button"
-          onClick={() => router.push('/wizard/step4')}
+          onClick={() => { sessionStorage.setItem("wizard_household_size", JSON.stringify(selected)); router.push('/wizard/step4'); }}
           className="w-full rounded-3xl px-6 py-5"
           style={{
             backgroundColor: '#1D6B4A',
