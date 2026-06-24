@@ -1,176 +1,57 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const towns = [
-  "Newark",
-  "East Orange",
-  "Orange",
-  "Irvington",
-  "Bloomfield",
-  "Montclair",
-  "West Orange",
-  "Maplewood",
-  "South Orange",
-  "Nutley",
-  "Belleville",
-  "Glen Ridge",
-  "Caldwell",
-  "Verona",
-];
-
-const preferences = [
-  "Near public transit",
-  "Near grocery store",
-  "Near school",
-  "Near highway",
-  "Near park",
-  "Other",
-];
+const towns = ['Any Essex County municipality', 'Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland'];
 
 export default function WizardStep4() {
   const router = useRouter();
-  const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
-  const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
-  const [otherPreference, setOtherPreference] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
 
-  const toggleTown = (town: string) => {
-    setSelectedTowns((current) =>
-      current.includes(town) ? current.filter((value) => value !== town) : [...current, town]
-    );
-  };
-
-  const togglePref = (pref: string) => {
-    setSelectedPrefs((current) => {
-      const next = current.includes(pref)
-        ? current.filter((value) => value !== pref)
-        : [...current, pref];
-
-      if (pref === 'Other' && current.includes(pref)) {
-        setOtherPreference('');
-      }
-
-      return next;
-    });
+  const toggle = (town: string) => {
+    setSelected(prev => prev.includes(town) ? prev.filter(t => t !== town) : [...prev, town]);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F5F0' }}>
-      <div className="w-full max-w-5xl p-6 sm:p-10" style={{ minHeight: '100vh' }}>
-        <div className="mb-10">
-          <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 32px' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button onClick={() => router.push('/wizard/step3')} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, padding: '6px 16px', fontSize: 13, color: '#64748B', cursor: 'pointer' }}>Back</button>
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#1E40AF' }}>Step 4 of 7</span>
+            </div>
+            <a href="/" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none' }}>Exit</a>
+          </div>
+          <div style={{ height: 2, backgroundColor: '#E2E8F0', borderRadius: 2, marginBottom: 48 }}>
+            <div style={{ width: '57.14%', height: '100%', backgroundColor: '#1E40AF', borderRadius: 2 }} />
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 300 }}>
+            Where in Essex County are you looking?
+          </h1>
+          <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.7 }}>Select all that apply.</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 32 }}>
+          {towns.map((town) => (
             <button
-              onClick={() => router.push('/wizard/step3')}
-              className="rounded-full px-4 py-2"
+              key={town}
+              onClick={() => toggle(town)}
               style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E0DDD8',
-                color: '#1D6B4A',
-                fontSize: 14,
-                fontWeight: 600,
+                backgroundColor: selected.includes(town) ? '#EFF6FF' : '#FFFFFF',
+                border: selected.includes(town) ? '1px solid #1E40AF' : '1px solid #E2E8F0',
+                borderRadius: 10, padding: '12px 16px', textAlign: 'left',
+                fontSize: 13, fontWeight: 500, color: selected.includes(town) ? '#1E40AF' : '#0D1117',
+                cursor: 'pointer',
               }}
             >
-              Back
+              {town}
             </button>
-            <p style={{ margin: 0, color: '#6B6B6B', fontSize: 14 }}>Step 4 of 7</p>
-          </div>
-          <div style={{ height: 6, borderRadius: 999, overflow: 'hidden', backgroundColor: '#E0DDD8', marginBottom: 24 }}>
-            <div style={{ width: '57.1429%', height: '100%', backgroundColor: '#1D6B4A' }} />
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 56, lineHeight: 1.02, color: '#1D6B4A', marginBottom: 18 }}>
-            Where in Essex County would you like to live?
-          </h1>
-          <p style={{ color: '#6B6B6B', fontSize: 18, maxWidth: 720, lineHeight: 1.75 }}>
-            Select all municipalities that interest you.
-          </p>
+          ))}
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          {towns.map((town) => {
-            const isActive = selectedTowns.includes(town);
-            return (
-              <button
-                key={town}
-                type="button"
-                onClick={() => toggleTown(town)}
-                className="rounded-3xl text-left px-6 py-5"
-                style={{
-                  backgroundColor: isActive ? '#E6F4E8' : '#FFFFFF',
-                  border: `1px solid ${isActive ? '#1D6B4A' : '#E0DDD8'}`,
-                  color: '#1A1A1A',
-                  fontSize: 18,
-                  fontWeight: 600,
-                  boxShadow: '0 20px 40px rgba(29, 107, 74, 0.08)',
-                }}
-              >
-                {town}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mb-8">
-          <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 40, lineHeight: 1.1, color: '#1D6B4A', marginBottom: 18 }}>
-            Any location preferences?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {preferences.map((pref) => {
-              const isChecked = selectedPrefs.includes(pref);
-              return (
-                <label
-                  key={pref}
-                  className="flex items-center rounded-3xl px-5 py-4"
-                  style={{
-                    backgroundColor: isChecked ? '#E6F4E8' : '#FFFFFF',
-                    border: `1px solid ${isChecked ? '#1D6B4A' : '#E0DDD8'}`,
-                    cursor: 'pointer',
-                    color: '#1A1A1A',
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => togglePref(pref)}
-                    className="mr-4 h-5 w-5"
-                    style={{ accentColor: '#1D6B4A' }}
-                  />
-                  <span style={{ fontSize: 18, fontWeight: 600 }}>{pref}</span>
-                </label>
-              );
-            })}
-          </div>
-          {selectedPrefs.includes('Other') && (
-            <div className="mt-4">
-              <input
-                type="text"
-                value={otherPreference}
-                onChange={(event) => setOtherPreference(event.target.value)}
-                placeholder="Type your preference"
-                className="w-full rounded-[28px] px-6 py-4"
-                style={{
-                  border: '1px solid #E0DDD8',
-                  backgroundColor: '#FFFFFF',
-                  color: '#1A1A1A',
-                  fontSize: 18,
-                  outline: 'none',
-                }}
-              />
-            </div>
-          )}
-        </div>
-
         <button
-          type="button"
-          onClick={() => { sessionStorage.setItem("wizard_towns", JSON.stringify(selectedTowns)); router.push('/wizard/step5'); }}
-          className="w-full rounded-3xl px-6 py-5"
-          style={{
-            backgroundColor: '#1D6B4A',
-            color: '#FFFFFF',
-            fontSize: 20,
-            fontWeight: 700,
-            border: 'none',
-          }}
+          onClick={() => { sessionStorage.setItem('wizard_towns', JSON.stringify(selected)); router.push('/wizard/step5'); }}
+          style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 10, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
         >
           Continue
         </button>

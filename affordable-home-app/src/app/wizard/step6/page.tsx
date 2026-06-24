@@ -1,104 +1,58 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const options = [
-  "Senior (62+)",
-  "Person with a disability",
-  "Veteran",
-  "Experiencing homelessness",
-  "Fleeing domestic violence",
-  "None of the above",
-];
+const options = ['Senior (62+)', 'Veteran', 'Person with a disability', 'Experiencing homelessness', 'None of the above'];
 
 export default function WizardStep6() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
 
-  const toggleOption = (option: string) => {
-    if (option === "None of the above") {
-      setSelected([option]);
-      return;
-    }
-
-    setSelected((current) => {
-      const next = current.includes(option)
-        ? current.filter((value) => value !== option)
-        : [...current.filter((value) => value !== "None of the above"), option];
-      return next;
-    });
+  const toggle = (opt: string) => {
+    if (opt === 'None of the above') { setSelected(['None of the above']); return; }
+    setSelected(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev.filter(o => o !== 'None of the above'), opt]);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F5F0' }}>
-      <div className="w-full max-w-5xl p-6 sm:p-10" style={{ minHeight: '100vh' }}>
-        <div className="mb-10">
-          <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-            <button
-              onClick={() => router.push('/wizard/step5')}
-              className="rounded-full px-4 py-2"
-              style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E0DDD8',
-                color: '#1D6B4A',
-                fontSize: 14,
-                fontWeight: 600,
-              }}
-            >
-              Back
-            </button>
-            <p style={{ margin: 0, color: '#6B6B6B', fontSize: 14 }}>Step 6 of 7</p>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 32px' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button onClick={() => router.push('/wizard/step5')} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: 8, padding: '6px 16px', fontSize: 13, color: '#64748B', cursor: 'pointer' }}>Back</button>
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#1E40AF' }}>Step 6 of 7</span>
+            </div>
+            <a href="/" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none' }}>Exit</a>
           </div>
-          <div style={{ height: 6, borderRadius: 999, overflow: 'hidden', backgroundColor: '#E0DDD8', marginBottom: 24 }}>
-            <div style={{ width: '85.7143%', height: '100%', backgroundColor: '#1D6B4A' }} />
+          <div style={{ height: 2, backgroundColor: '#E2E8F0', borderRadius: 2, marginBottom: 48 }}>
+            <div style={{ width: '85.71%', height: '100%', backgroundColor: '#1E40AF', borderRadius: 2 }} />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 56, lineHeight: 1.02, color: '#1D6B4A', marginBottom: 18 }}>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 300 }}>
             Do any of these apply to you?
           </h1>
-          <p style={{ color: '#6B6B6B', fontSize: 18, maxWidth: 720, lineHeight: 1.75 }}>
-            Select all that apply. This helps us find programs you may qualify for.
-          </p>
+          <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.7 }}>Select all that apply. Some programs prioritize specific groups.</p>
         </div>
-
-        <div className="grid grid-cols-1 gap-4 mb-8">
-          {options.map((option) => {
-            const isChecked = selected.includes(option);
-            return (
-              <label
-                key={option}
-                className="flex items-center rounded-3xl px-6 py-5"
-                style={{
-                  backgroundColor: isChecked ? '#E6F4E8' : '#FFFFFF',
-                  border: `1px solid ${isChecked ? '#1D6B4A' : '#E0DDD8'}`,
-                  color: '#1A1A1A',
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => toggleOption(option)}
-                  className="mr-4 h-5 w-5"
-                  style={{ accentColor: '#1D6B4A' }}
-                />
-                <span style={{ fontSize: 18, fontWeight: 600 }}>{option}</span>
-              </label>
-            );
-          })}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => toggle(opt)}
+              style={{
+                backgroundColor: selected.includes(opt) ? '#EFF6FF' : '#FFFFFF',
+                border: selected.includes(opt) ? '1px solid #1E40AF' : '1px solid #E2E8F0',
+                borderRadius: 12, padding: '20px 24px', textAlign: 'left',
+                fontSize: 16, fontWeight: 500, color: selected.includes(opt) ? '#1E40AF' : '#0D1117',
+                cursor: 'pointer', fontFamily: 'var(--font-dm-serif)',
+              }}
+            >
+              {opt}
+            </button>
+          ))}
         </div>
-
         <button
-          type="button"
-          onClick={() => { sessionStorage.setItem("wizard_circumstances", JSON.stringify(selected)); router.push('/wizard/step7'); }}
-          className="w-full rounded-3xl px-6 py-5"
-          style={{
-            backgroundColor: '#1D6B4A',
-            color: '#FFFFFF',
-            fontSize: 20,
-            fontWeight: 700,
-            border: 'none',
-          }}
+          onClick={() => { sessionStorage.setItem('wizard_circumstances', JSON.stringify(selected)); router.push('/wizard/step7'); }}
+          style={{ marginTop: 24, backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 10, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
         >
           Continue
         </button>
