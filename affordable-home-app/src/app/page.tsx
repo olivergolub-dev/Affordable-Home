@@ -134,7 +134,7 @@ export default function Home() {
       </section>
 
       {/* STATS BAR */}
-      <section style={{ backgroundColor: '#0A1628', padding: '32px 48px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ backgroundColor: '#071020', padding: '32px 48px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 64, flexWrap: 'wrap' }}>
           {[
             { n: '25+', label: 'Verified listings' },
@@ -153,11 +153,11 @@ export default function Home() {
       </section>
 
       {/* WHAT YOU'LL FIND */}
-      <section style={{ backgroundColor: '#FFFFFF', padding: '120px 48px' }}>
+      <section style={{ backgroundColor: '#0A1628', padding: '120px 48px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>What you'll find</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 64, color: '#0D1117' }}>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 64, color: '#F0F6FF' }}>
               Trusted guidance for every affordable housing pathway.
             </h2>
           </FadeUp>
@@ -168,10 +168,10 @@ export default function Home() {
               { label: 'Open waitlists', desc: 'Real-time status and direct links to official applications.' },
             ].map((item, i) => (
               <FadeUp key={item.label} delay={i * 0.12}>
-                <div style={{ borderTop: '2px solid #0D1117', paddingTop: 32 }}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: 32 }}>
                   <div style={{ width: 36, height: 36, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: 'white', fontSize: 14, fontWeight: 700 }}>✓</div>
                   <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.35rem', marginBottom: 12, color: '#0D1117' }}>{item.label}</p>
-                  <p style={{ fontSize: 15, lineHeight: 1.8, color: '#64748B' }}>{item.desc}</p>
+                  <p style={{ fontSize: 15, lineHeight: 1.8, color: 'rgba(255,255,255,0.5)' }}>{item.desc}</p>
                 </div>
               </FadeUp>
             ))}
@@ -192,7 +192,7 @@ export default function Home() {
             {[
               { n: '01', title: 'Tell us about your household', desc: 'Seven quick questions about size, income, and what you need.' },
               { n: '02', title: 'We match programs you qualify for', desc: 'Your profile is compared against every program and listing in Essex County.' },
-              { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application — no middleman.' },
+              { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application no middleman.' },
             ].map((item, i) => (
               <FadeUp key={item.n} delay={i * 0.15}>
                 <div style={{ padding: '40px 32px 40px 0', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
@@ -214,11 +214,11 @@ export default function Home() {
       </section>
 
       {/* WHY AFFORDABLE HOME */}
-      <section style={{ backgroundColor: '#F8FAFC', padding: '120px 48px' }}>
+      <section style={{ backgroundColor: '#0C1E35', padding: '120px 48px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>Why Affordable Home</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 64, color: '#0D1117' }}>Built different<br />on purpose.</h2>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 64, color: '#F0F6FF' }}>Built different<br />on purpose.</h2>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             {[
@@ -230,12 +230,12 @@ export default function Home() {
               { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.' },
             ].map((item, i) => (
               <FadeUp key={item.title} delay={i * 0.07}>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: '28px 24px', border: '1px solid #E2E8F0' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '28px 24px', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     <span style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: '#1E40AF', color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
                     <div>
-                      <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0D1117' }}>{item.title}</p>
-                      <p style={{ fontSize: 14, lineHeight: 1.7, color: '#64748B' }}>{item.text}</p>
+                      <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#F0F6FF' }}>{item.title}</p>
+                      <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.5)' }}>{item.text}</p>
                     </div>
                   </div>
                 </div>
@@ -246,22 +246,22 @@ export default function Home() {
       </section>
 
       {/* COVERAGE */}
-      <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: '120px 48px' }}>
+      <section id="coverage" style={{ backgroundColor: '#0A1628', padding: '120px 48px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1E40AF', marginBottom: 16 }}>Coverage</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117' }}>All of Essex County.</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', maxWidth: 560, marginBottom: 56 }}>From Newark high-rises to Caldwell garden apartments — if it's affordable housing in Essex County, we track it.</p>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#F0F6FF' }}>All of Essex County.</h2>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: 'rgba(255,255,255,0.5)', maxWidth: 560, marginBottom: 56 }}>From Newark high-rises to Caldwell garden apartments if it's affordable housing in Essex County, we track it.</p>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, marginBottom: 56 }}>
             {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge'].map((town, i) => (
               <FadeUp key={town} delay={i * 0.03}>
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#0D1117', backgroundColor: '#F8FAFC' }}>{town}</div>
+                <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.04)' }}>{town}</div>
               </FadeUp>
             ))}
           </div>
           <FadeUp delay={0.3}>
-            <a href="/wizard" style={{ backgroundColor: '#0A1628', color: 'white', padding: '16px 36px', borderRadius: 8, fontSize: 15, fontWeight: 700, textDecoration: 'none', display: 'inline-block' }}>
+            <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '16px 36px', borderRadius: 8, fontSize: 15, fontWeight: 700, textDecoration: 'none', display: 'inline-block' }}>
               Start matching →
             </a>
           </FadeUp>
@@ -269,7 +269,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor: '#0A1628', padding: '40px 48px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <footer style={{ backgroundColor: '#071020', padding: '40px 48px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>© 2025 Affordable Home · Essex County, NJ</p>
           <div style={{ display: 'flex', gap: 24 }}>
