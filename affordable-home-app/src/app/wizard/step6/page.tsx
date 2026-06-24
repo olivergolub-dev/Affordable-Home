@@ -28,7 +28,7 @@ export default function WizardStep6() {
           <div style={{ height: 2, backgroundColor: '#E2E8F0', borderRadius: 2, marginBottom: 48 }}>
             <div style={{ width: '85.71%', height: '100%', backgroundColor: '#1E40AF', borderRadius: 2 }} />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 300 }}>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 400 }}>
             Do any of these apply to you?
           </h1>
           <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.7 }}>Select all that apply. Some programs prioritize specific groups.</p>

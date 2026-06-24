@@ -20,7 +20,7 @@ export default function WizardStep7() {
           <div style={{ height: 2, backgroundColor: '#E2E8F0', borderRadius: 2, marginBottom: 48 }}>
             <div style={{ width: '100%', height: '100%', backgroundColor: '#1E40AF', borderRadius: 2 }} />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 300 }}>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 16, fontWeight: 400 }}>
             Want your results emailed to you?
           </h1>
           <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.7 }}>Optional. We send your results once and never store your address.</p>
