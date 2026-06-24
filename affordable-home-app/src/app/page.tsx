@@ -193,10 +193,10 @@ export default function Home() {
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117', fontWeight: 300 }}>All of Essex County.</h2>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: '#64748B', maxWidth: 560, marginBottom: 56 }}>From Newark high-rises to Caldwell garden apartments. If it is affordable housing in Essex County, we track it.</p>
           </FadeUp>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, marginBottom: 56 }}>
-            {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge'].map((town, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 56 }}>
+            {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland', 'Millburn'].map((town, i) => (
               <FadeUp key={town} delay={i * 0.03}>
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#0D1117', backgroundColor: '#F8FAFC' }}>{town}</div>
+                <div style={{ border: '1px solid #E8EDF5', borderRadius: 10, padding: '14px 18px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#FFFFFF', letterSpacing: '0.01em' }}>{town}</div>
               </FadeUp>
             ))}
           </div>
