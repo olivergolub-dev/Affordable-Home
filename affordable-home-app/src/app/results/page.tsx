@@ -10,19 +10,11 @@ const amiOptions = ['All', '30%', '50%', '60%', '80%'];
 function formatRent(rent: number | null | undefined) {
   if (rent == null || rent === 0) return 'Contact for rent';
   if (typeof rent === 'number') {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(rent) + '/mo';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rent) + '/mo';
   }
   const normalized = String(rent).trim();
-  if (/^\$/.test(normalized)) {
-    return normalized.includes('/mo') ? normalized : `${normalized}/mo`;
-  }
-  if (/^\d+(\.\d+)?$/.test(normalized)) {
-    return `$${Number(normalized).toLocaleString('en-US')}/mo`;
-  }
+  if (/^\$/.test(normalized)) return normalized.includes('/mo') ? normalized : `${normalized}/mo`;
+  if (/^\d+(\.\d+)?$/.test(normalized)) return `$${Number(normalized).toLocaleString('en-US')}/mo`;
   return normalized;
 }
 
@@ -30,8 +22,9 @@ function availabilityBadge(waitlistOpen: boolean | string | null | undefined) {
   const isOpen = waitlistOpen === false || String(waitlistOpen) === 'false';
   return {
     label: isOpen ? 'Open' : 'Waitlist',
-    bg: isOpen ? '#DCFCE7' : '#FEF3C7',
-    text: isOpen ? '#166534' : '#92400E',
+    bg: isOpen ? '#EFF6FF' : '#F0FDF4',
+    text: isOpen ? '#1E40AF' : '#166534',
+    border: isOpen ? '#BFDBFE' : '#BBF7D0',
   };
 }
 
@@ -42,9 +35,8 @@ export default function ResultsPage() {
   const [availability, setAvailability] = useState('All');
   const [bedrooms, setBedrooms] = useState('All');
   const [ami, setAmi] = useState('All');
-
-  // Read wizard answers from sessionStorage
   const [wizardAnswers, setWizardAnswers] = useState<any>({});
+
   useEffect(() => {
     const answers = {
       income: sessionStorage.getItem('wizard_income') || '',
@@ -58,34 +50,21 @@ export default function ResultsPage() {
 
   useEffect(() => {
     let isMounted = true;
-
     async function loadListings() {
       setLoading(true);
       setError(null);
-
       const { data, error } = await supabase
         .from('Affordable Home')
         .select('name, city, bedrooms, rent, ami_band, wailist_open, application_link, program_type');
-
       if (!isMounted) return;
-
-      if (error) {
-        setError(error.message);
-        setListings([]);
-      } else {
-        setListings(data ?? []);
-      }
+      if (error) { setError(error.message); setListings([]); }
+      else { setListings(data ?? []); }
       setLoading(false);
     }
-
     loadListings();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
-  // Calculate AMI tier from income
   const getAmiTier = (incomeStr: string) => {
     const income = parseInt(incomeStr.replace(/[^0-9]/g, ''));
     if (!income) return null;
@@ -101,209 +80,133 @@ export default function ResultsPage() {
     const userTowns: string[] = wizardAnswers.towns || [];
     return listings.filter((listing) => {
       const waitlistOpen = listing.wailist_open === true || String(listing.wailist_open) === 'true';
-      // Filter by town if user selected specific towns
-      const townMatch = userTowns.length === 0 || 
-        userTowns.some((t: string) => t.toLowerCase() === 'any essex county municipality') ||
+      const townMatch = userTowns.length === 0 ||
+        userTowns.some((t: string) => t.toLowerCase().includes('any')) ||
         userTowns.some((t: string) => listing.city?.toLowerCase().includes(t.toLowerCase()));
-
-      // Filter by AMI tier if we can calculate it
-      const amiMatch = !userAmiTier || !listing.ami_band || 
-        listing.ami_band.includes(userAmiTier) || ami !== 'All';
-
-      const availabilityMatch =
-        availability === 'All' ||
-        (availability === 'Open' && waitlistOpen === false) ||
-        (availability === 'Waitlist' && waitlistOpen === true);
-
-      const bedroomsMatch = bedrooms === 'All' || String(listing.bedrooms) === bedrooms;
-
-
-
-      return availabilityMatch && bedroomsMatch && amiMatch;
+      const amiMatch = ami === 'All' || !listing.ami_band || listing.ami_band.includes(ami.replace('%', ''));
+      const availabilityMatch = availability === 'All' ||
+        (availability === 'Open' && !waitlistOpen) ||
+        (availability === 'Waitlist' && waitlistOpen);
+      const bedroomsMatch = bedrooms === 'All' || listing.bedrooms === null || String(listing.bedrooms) === bedrooms;
+      return availabilityMatch && bedroomsMatch && amiMatch && townMatch;
     });
-  }, [listings, availability, bedrooms, ami]);
+  }, [listings, availability, bedrooms, ami, wizardAnswers]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F7F5F0', color: '#1A1A1A' }}>
-      <main className="mx-auto w-full max-w-6xl px-6 py-12">
-        <div className="mb-10">
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 52, lineHeight: 1.05, color: '#1D6B4A', marginBottom: 16 }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
+      {/* NAV */}
+      <header style={{ backgroundColor: '#0A1628', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div style={{ width: 30, height: 30, borderRadius: 7, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Affordable Home</span>
+          </a>
+          <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+            Retake Quiz
+          </a>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 32px' }}>
+        {/* Header */}
+        <div style={{ marginBottom: 40 }}>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 8, fontWeight: 400 }}>
             Your matches in Essex County
           </h1>
-          <p style={{ fontSize: 18, color: '#6B6B6B', lineHeight: 1.75, maxWidth: 760 }}>
+          <p style={{ fontSize: 16, color: '#64748B' }}>
             Based on your answers, here are the housing options that fit your household.
           </p>
         </div>
 
-        <div className="mb-10 rounded-[28px] border border-[#E0DDD8] bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-              <label style={{ fontSize: 14, color: '#6B6B6B' }}>
-                Availability
-                <select
-                  value={availability}
-                  onChange={(event) => setAvailability(event.target.value)}
-                  style={{
-                    marginLeft: 12,
-                    padding: '10px 14px',
-                    borderRadius: 14,
-                    border: '1px solid #E0DDD8',
-                    backgroundColor: '#FFFFFF',
-                    color: '#1A1A1A',
-                    fontSize: 14,
-                  }}
-                >
-                  {availabilityOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label style={{ fontSize: 14, color: '#6B6B6B' }}>
-                Bedrooms
-                <select
-                  value={bedrooms}
-                  onChange={(event) => setBedrooms(event.target.value)}
-                  style={{
-                    marginLeft: 12,
-                    padding: '10px 14px',
-                    borderRadius: 14,
-                    border: '1px solid #E0DDD8',
-                    backgroundColor: '#FFFFFF',
-                    color: '#1A1A1A',
-                    fontSize: 14,
-                  }}
-                >
-                  {bedroomOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label style={{ fontSize: 14, color: '#6B6B6B' }}>
-                AMI Tier
-                <select
-                  value={ami}
-                  onChange={(event) => setAmi(event.target.value)}
-                  style={{
-                    marginLeft: 12,
-                    padding: '10px 14px',
-                    borderRadius: 14,
-                    border: '1px solid #E0DDD8',
-                    backgroundColor: '#FFFFFF',
-                    color: '#1A1A1A',
-                    fontSize: 14,
-                  }}
-                >
-                  {amiOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
+        {/* Filter Bar */}
+        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Availability', value: availability, setter: setAvailability, options: availabilityOptions },
+            { label: 'Bedrooms', value: bedrooms, setter: setBedrooms, options: bedroomOptions },
+            { label: 'AMI Tier', value: ami, setter: setAmi, options: amiOptions },
+          ].map(({ label, value, setter, options }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>{label}</span>
+              <select
+                value={value}
+                onChange={e => setter(e.target.value)}
+                style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
+              >
+                {options.map(o => <option key={o}>{o}</option>)}
+              </select>
             </div>
-            <div style={{ color: '#6B6B6B', fontSize: 14 }}>
-              {loading ? 'Loading listings…' : `${filteredListings.length} matches found`}
-            </div>
+          ))}
+          <div style={{ marginLeft: 'auto', fontSize: 13, color: '#64748B', fontWeight: 500 }}>
+            {loading ? 'Loading...' : `${filteredListings.length} matches found`}
           </div>
         </div>
 
-        {error ? (
-          <div className="rounded-[28px] bg-[#FEF3F2] p-6 text-[#991B1B] shadow-sm">
+        {/* Error */}
+        {error && (
+          <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '16px 20px', marginBottom: 24, color: '#DC2626', fontSize: 14 }}>
             Failed to load listings: {error}
           </div>
-        ) : loading ? (
-          <div className="rounded-[32px] bg-white p-10 text-center shadow-[0_20px_40px_rgba(0,0,0,0.05)]">
-            <p style={{ fontSize: 18, color: '#4B5563' }}>Loading listings…</p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {filteredListings.map((listing) => {
-              const badge = availabilityBadge(listing.wailist_open);
-              const isOpen = badge.label === 'Open';
-              const rentLabel = formatRent(listing.rent);
-              const bedroomLabel = listing.bedrooms ? String(listing.bedrooms) : null;
-              const amiValue = String(listing.ami_band ?? '').trim();
-              const amiLabel = amiValue
-                ? amiValue.toUpperCase().includes('AMI')
-                  ? amiValue
-                  : `${amiValue} AMI`
-                : null;
+        )}
 
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#94A3B8', fontSize: 15 }}>
+            Loading listings...
+          </div>
+        )}
+
+        {/* No results */}
+        {!loading && filteredListings.length === 0 && !error && (
+          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '48px 32px', textAlign: 'center' }}>
+            <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
+            <p style={{ fontSize: 14, color: '#94A3B8', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
+            <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
+              Retake the quiz
+            </a>
+          </div>
+        )}
+
+        {/* Listings */}
+        {!loading && filteredListings.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filteredListings.map((listing, i) => {
+              const badge = availabilityBadge(listing.wailist_open);
               return (
-                <div key={`${listing.name}-${listing.city}-${listing.bedrooms}`} className="rounded-[32px] bg-white p-6 shadow-[0_20px_40px_rgba(0,0,0,0.05)]">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3" style={{ marginBottom: 8 }}>
-                        <span style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A' }}>{listing.name}</span>
-                        <span style={{ fontSize: 14, color: '#6B6B6B' }}>{listing.city}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-3" style={{ color: '#4B5563', fontSize: 14 }}>
-                        {bedroomLabel ? <span>{bedroomLabel}</span> : null}
-                        <span>{rentLabel}</span>
-                        {amiLabel ? <span>{amiLabel}</span> : null}
-                        {listing.program_type ? <span>{listing.program_type}</span> : null}
-                      </div>
+                <div key={i} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
+                      <span style={{ fontSize: 13, color: '#94A3B8' }}>{listing.city}</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span
-                        style={{
-                          backgroundColor: isOpen ? '#DCFCE7' : '#FEF3C7',
-                          color: isOpen ? '#166534' : '#92400E',
-                          borderRadius: 999,
-                          padding: '8px 14px',
-                          fontSize: 14,
-                          fontWeight: 700,
-                          minWidth: 88,
-                          textAlign: 'center',
-                        }}
-                      >
-                        {badge.label}
+                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748B' }}>
+                      <span>{formatRent(listing.rent)}</span>
+                      {listing.ami_band && <span>{listing.ami_band}</span>}
+                      {listing.program_type && <span>{listing.program_type}</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ backgroundColor: badge.bg, color: badge.text, border: `1px solid ${badge.border}`, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600 }}>
+                      {badge.label}
+                    </span>
+                    {listing.application_link ? (
+                      <a href={listing.application_link} target="_blank" rel="noopener noreferrer"
+                        style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                        Apply
+                      </a>
+                    ) : (
+                      <span style={{ backgroundColor: '#F1F5F9', color: '#94A3B8', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
+                        No link
                       </span>
-                      {listing.application_link ? (
-                        <a
-                          href={listing.application_link}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            backgroundColor: '#1D6B4A',
-                            color: '#FFFFFF',
-                            padding: '12px 22px',
-                            borderRadius: 18,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            textDecoration: 'none',
-                          }}
-                        >
-                          Apply
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          style={{
-                            backgroundColor: '#F3F4F6',
-                            color: '#1A1A1A',
-                            padding: '12px 22px',
-                            borderRadius: 18,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            border: '1px solid #E5E7EB',
-                          }}
-                        >
-                          Contact
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
