@@ -115,7 +115,7 @@ export default function ResultsPage() {
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 8, fontWeight: 400 }}>
             Your matches in Essex County
           </h1>
-          <p style={{ fontSize: 16, color: '#64748B' }}>
+          <p style={{ fontSize: 16, color: '#334155' }}>
             Based on your answers, here are the housing options that fit your household.
           </p>
         </div>
@@ -128,7 +128,7 @@ export default function ResultsPage() {
             { label: 'AMI Tier', value: ami, setter: setAmi, options: amiOptions },
           ].map(({ label, value, setter, options }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>{label}</span>
               <select
                 value={value}
                 onChange={e => setter(e.target.value)}
@@ -152,7 +152,7 @@ export default function ResultsPage() {
 
         {/* Loading */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#94A3B8', fontSize: 15 }}>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#64748B', fontSize: 15 }}>
             Loading listings...
           </div>
         )}
@@ -161,7 +161,7 @@ export default function ResultsPage() {
         {!loading && filteredListings.length === 0 && !error && (
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
             <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
-            <p style={{ fontSize: 14, color: '#94A3B8', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
+            <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
             <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
               Retake the quiz
             </a>
@@ -178,9 +178,9 @@ export default function ResultsPage() {
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
-                      <span style={{ fontSize: 13, color: '#94A3B8' }}>{listing.city}</span>
+                      <span style={{ fontSize: 13, color: '#64748B' }}>{listing.city}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748B' }}>
+                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155' }}>
                       <span>{formatRent(listing.rent)}</span>
                       {listing.ami_band && <span>{listing.ami_band}</span>}
                       {listing.program_type && <span>{listing.program_type}</span>}
@@ -196,7 +196,7 @@ export default function ResultsPage() {
                         Apply
                       </a>
                     ) : (
-                      <span style={{ backgroundColor: '#F1F5F9', color: '#94A3B8', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
+                      <span style={{ backgroundColor: '#F1F5F9', color: '#64748B', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
                         No link
                       </span>
                     )}
