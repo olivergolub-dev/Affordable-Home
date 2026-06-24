@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, DM_Serif_Display } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const dmSerif = DM_Serif_Display({
+const cormorant = Cormorant_Garamond({
   variable: "--font-dm-serif",
-  weight: ["400"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
   subsets: ["latin"],
 });
 
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmSerif.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-inter" style={{ backgroundColor: '#F7F5F0' }}>
         {children}
       </body>
