@@ -54,7 +54,7 @@ export default function ResultsPage() {
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
-        .from('Affordable Home')
+        .from('Home Reach')
         .select('name, city, bedrooms, rent, ami_band, wailist_open, application_link, program_type');
       if (!isMounted) return;
       if (error) { setError(error.message); setListings([]); }
@@ -101,7 +101,7 @@ export default function ResultsPage() {
             <div style={{ width: 30, height: 30, borderRadius: 7, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Affordable Home</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
           </a>
           <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
             Retake Quiz

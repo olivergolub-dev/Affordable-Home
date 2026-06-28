@@ -15,9 +15,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Affordable Home - Essex County, NJ",
+  title: "Home Reach - Essex County, NJ",
   description:
-    "Find affordable housing in Essex County, NJ. Discover programs, listings, and waitlists you qualify for.",
+    "Home Reach is Essex County's free housing guide. Find affordable programs, listings, and waitlists you qualify for.",
 };
 
 export default function RootLayout({

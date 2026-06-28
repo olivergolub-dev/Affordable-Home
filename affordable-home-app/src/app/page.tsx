@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { motion, useInView, useScroll } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -110,12 +110,43 @@ function ParticleCanvas() {
     };
   }, []);
 
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />;
+}
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
   return (
-    <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />
+    <motion.div
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 2,
+        background: 'linear-gradient(to right, #1E40AF, #60A5FA)',
+        scaleX: scrollYProgress, transformOrigin: '0%',
+        zIndex: 100,
+      }}
+    />
   );
 }
 
-function GlassCard({ n, label, delay }: { n: number; suffix: string; label: string; delay: number }) {
+function Ticker() {
+  const items = ['Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · '];
+  return (
+    <div style={{ backgroundColor: '#0A1628', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '10px 0' }}>
+      <motion.div
+        animate={{ x: [0, -2000] }}
+        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        style={{ display: 'flex', gap: 0, whiteSpace: 'nowrap' }}
+      >
+        {[...Array(4)].map((_, i) => (
+          <span key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', paddingRight: 48 }}>
+            {items[0]}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+function GlassCard({ n, suffix, label, delay }: { n: number; suffix: string; label: string; delay: number }) {
   return (
     <FadeUp delay={delay}>
       <div style={{
@@ -126,10 +157,10 @@ function GlassCard({ n, label, delay }: { n: number; suffix: string; label: stri
         padding: '24px 32px',
         minWidth: 160,
       }}>
-        <p style={{ fontSize: 48, fontWeight: 800, color: '#FFFFFF', marginBottom: 4, lineHeight: 1 }}>
-          <AnimatedNumber target={n} suffix={label === 'Free, always' ? '%' : label === 'Accounts required' ? '' : '+'} />
+        <p style={{ fontSize: 48, fontWeight: 800, color: '#FFFFFF', marginBottom: 4, lineHeight: 1, fontFamily: 'Inter, sans-serif' }}>
+          <AnimatedNumber target={n} suffix={suffix} />
         </p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500 }}>{label}</p>
       </div>
     </FadeUp>
   );
@@ -138,6 +169,7 @@ function GlassCard({ n, label, delay }: { n: number; suffix: string; label: stri
 export default function Home() {
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#0D1117' }}>
+      <ScrollProgress />
 
       {/* NAV */}
       <motion.header
@@ -156,7 +188,10 @@ export default function Home() {
             <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em' }}>Affordable Home</span>
+            <div>
+              <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block' }}>Home Reach</span>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Essex County's free housing guide</span>
+            </div>
           </div>
           <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 500, flexWrap: 'wrap' }}>
             <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Browse Listings</a>
@@ -177,6 +212,12 @@ export default function Home() {
           transition={{ duration: 20, ease: 'linear', repeat: Infinity, repeatType: 'reverse' }}
           style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', filter: 'brightness(0.28)' }}
         />
+        {/* Noise texture overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0, opacity: 0.04,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+        }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,22,40,0.98) 0%, rgba(10,22,40,0.5) 50%, rgba(10,22,40,0.25) 100%)', zIndex: 0 }} />
         <ParticleCanvas />
 
@@ -189,8 +230,9 @@ export default function Home() {
             initial={{ opacity: 0, y: 56, filter: 'blur(6px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 2.0, delay: 0.5, ease: [0.06, 0.6, 0.12, 1.0] }}
-            style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(4rem, 11vw, 10rem)', lineHeight: 0.88, color: '#FFFFFF', marginBottom: 40, maxWidth: 1000, fontWeight: 300 }}>
-            Your home<br />is out there.
+            style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(4rem, 11vw, 10rem)', lineHeight: 0.88, marginBottom: 40, maxWidth: 1000, fontWeight: 300 }}>
+            <span style={{ color: '#FFFFFF' }}>Your home</span><br />
+            <span style={{ background: 'linear-gradient(135deg, #FFFFFF 0%, #93C5FD 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>is out there.</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 1.0, ease: [0.06, 0.6, 0.12, 1.0] }}
             style={{ fontSize: 18, color: 'rgba(255,255,255,0.85)', maxWidth: 480, lineHeight: 1.7, marginBottom: 40 }}>
@@ -208,8 +250,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TICKER */}
+      <Ticker />
+
       {/* GLASS STATS BAR */}
-      <section style={{ backgroundColor: '#0A1628', padding: 'clamp(40px, 5vw, 64px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ backgroundColor: '#0A1628', padding: 'clamp(40px, 5vw, 64px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+        {/* Noise on dark sections */}
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           <GlassCard n={25} suffix="+" label="Verified listings" delay={0} />
           <GlassCard n={22} suffix="" label="Municipalities covered" delay={0.1} />
@@ -217,6 +264,13 @@ export default function Home() {
           <GlassCard n={0} suffix="" label="Accounts required" delay={0.3} />
         </div>
       </section>
+
+      {/* DIVIDER */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#FFFFFF' }}>
+        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1', margin: '0 16px' }} />
+        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+      </div>
 
       {/* WHAT YOU'LL FIND */}
       <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
@@ -235,11 +289,11 @@ export default function Home() {
             ].map((item, i) => (
               <FadeUp key={item.label} delay={i * 0.12}>
                 <motion.div
-                  whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(30,64,175,0.08)' }}
+                  whileHover={{ y: -4 }}
                   transition={{ duration: 0.2 }}
-                  style={{ borderTop: '2px solid #0D1117', paddingTop: 32, cursor: 'default' }}
+                  style={{ borderTop: '2px solid #0D1117', paddingTop: 32 }}
                 >
-                  <div style={{ width: 36, height: 36, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: 'white', fontSize: 14, fontWeight: 700 }}>✓</div>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#1E40AF', marginBottom: 24 }} />
                   <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.4rem', marginBottom: 12, color: '#0D1117', fontWeight: 400 }}>{item.label}</p>
                   <p style={{ fontSize: 15, lineHeight: 1.8, color: '#475569' }}>{item.desc}</p>
                 </motion.div>
@@ -249,9 +303,17 @@ export default function Home() {
         </div>
       </section>
 
+      {/* DIVIDER */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#0A1628' }}>
+        <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', margin: '0 16px' }} />
+        <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+      </div>
+
       {/* HOW IT WORKS */}
-      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#93C5FD', marginBottom: 16 }}>How it works</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 64, fontWeight: 300 }}>
@@ -279,30 +341,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHY AFFORDABLE HOME - gradient mesh */}
+      {/* WHY HOME REACH - gradient mesh */}
       <section style={{
         padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)',
         background: 'linear-gradient(135deg, #F0F4FF 0%, #F8FAFC 40%, #EEF2FF 70%, #F0F9FF 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Mesh blobs */}
         <div style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: -80, left: -80, width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Why Affordable Home</p>
+            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Why Home Reach</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
           </FadeUp>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          {/* Staggered grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, alignItems: 'start' }}>
             {[
-              { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.' },
-              { title: 'Verified data', text: 'Every listing shows its source and last-verified date.' },
-              { title: 'Hyper-local', text: 'Newark, East Orange, Irvington, and all 22 municipalities.' },
-              { title: 'Private by design', text: 'Your answers stay in your browser. No account, no tracking.' },
-              { title: 'Always current', text: 'Listings re-verified and waitlist statuses kept up to date.' },
-              { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.' },
+              { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.', offset: 0 },
+              { title: 'Verified data', text: 'Every listing shows its source and last-verified date.', offset: 24 },
+              { title: 'Hyper-local', text: 'Newark, East Orange, Irvington, and all 22 municipalities.', offset: 0 },
+              { title: 'Private by design', text: 'Your answers stay in your browser. No account, no tracking.', offset: 24 },
+              { title: 'Always current', text: 'Listings re-verified and waitlist statuses kept up to date.', offset: 0 },
+              { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.', offset: 24 },
             ].map((item, i) => (
               <FadeUp key={item.title} delay={i * 0.07}>
                 <motion.div
@@ -314,12 +376,12 @@ export default function Home() {
                     borderRadius: 12,
                     padding: '28px 24px',
                     border: '1px solid rgba(255,255,255,0.9)',
+                    marginTop: item.offset,
                     cursor: 'default',
-                    height: '100%',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    <span style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: '#1E40AF', color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#1E40AF', flexShrink: 0, marginTop: 6 }} />
                     <div>
                       <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0D1117' }}>{item.title}</p>
                       <p style={{ fontSize: 14, lineHeight: 1.7, color: '#475569' }}>{item.text}</p>
@@ -331,6 +393,13 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* DIVIDER */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#FFFFFF' }}>
+        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1', margin: '0 16px' }} />
+        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+      </div>
 
       {/* COVERAGE */}
       <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
@@ -344,7 +413,7 @@ export default function Home() {
             {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland', 'West Caldwell'].map((town, i) => (
               <FadeUp key={town} delay={i * 0.02}>
                 <motion.div
-                  whileHover={{ backgroundColor: '#1E40AF', color: '#FFFFFF', borderColor: '#1E40AF', scale: 1.03 }}
+                  whileHover={{ backgroundColor: '#1E40AF', color: '#FFFFFF', borderColor: '#1E40AF' }}
                   transition={{ duration: 0.15 }}
                   style={{ border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 14px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#F8FAFC', textAlign: 'center', cursor: 'default' }}
                 >
@@ -357,26 +426,27 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor: '#0A1628', padding: 'clamp(32px, 4vw, 48px) clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      <footer style={{ backgroundColor: '#0A1628', padding: 'clamp(32px, 4vw, 48px) clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 32, marginBottom: 32 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <div style={{ width: 30, height: 30, borderRadius: 7, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Affordable Home</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
               </div>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', maxWidth: 280, lineHeight: 1.7 }}>A free resource connecting Essex County residents to affordable housing programs and income-qualified listings.</p>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', maxWidth: 280, lineHeight: 1.7 }}>Essex County's free housing guide. Connecting residents to affordable programs and income-qualified listings.</p>
             </div>
             <div style={{ display: 'flex', gap: 32 }}>
               {['Privacy', 'Contact', 'Data sources'].map(link => (
-                <a key={link} href="#" style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}>{link}</a>
+                <a key={link} href="#" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>{link}</a>
               ))}
             </div>
           </div>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24 }}>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>2025 Affordable Home · Essex County, NJ · Not a government agency</p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>2025 Home Reach · Essex County, NJ · Not a government agency</p>
           </div>
         </div>
       </footer>
