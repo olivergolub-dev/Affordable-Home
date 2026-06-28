@@ -153,9 +153,10 @@ function GlassCard({ n, suffix, label, delay }: { n: number; suffix: string; lab
         background: 'rgba(255,255,255,0.05)',
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: 16,
+        borderRadius: 4,
         padding: '24px 32px',
         minWidth: 160,
+        position: 'relative',
       }}>
         <p style={{ fontSize: 48, fontWeight: 800, color: '#FFFFFF', marginBottom: 4, lineHeight: 1, fontFamily: 'Inter, sans-serif' }}>
           <AnimatedNumber target={n} suffix={suffix} />
@@ -276,7 +277,7 @@ export default function Home() {
       <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>What you'll find</p>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; WHAT YOU'LL FIND</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>
               Trusted guidance for every affordable housing pathway.
             </h2>
@@ -315,25 +316,27 @@ export default function Home() {
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#93C5FD', marginBottom: 16 }}>How it works</p>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: 'rgba(255,255,255,0.4)', marginBottom: 16, fontFamily: 'monospace' }}>[ 02 ] &mdash;&mdash; HOW IT WORKS</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 64, fontWeight: 300 }}>
               Three steps. No guesswork.
             </h2>
           </FadeUp>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { n: '01', title: 'Tell us about your household', desc: 'Seven quick questions about size, income, and what you need.' },
-              { n: '02', title: 'We match programs you qualify for', desc: 'Your profile is compared against every program and listing in Essex County.' },
-              { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application. No middleman.' },
+              { n: '01', title: 'Tell us about your household', desc: 'Seven quick questions about size, income, and what you need. Income, location, household size, voucher status, and more.' },
+              { n: '02', title: 'We match programs you qualify for', desc: 'Your profile is compared against every program and listing in Essex County. AMI tier, voucher eligibility, and town preferences all factor in.' },
+              { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application. No middleman, no fees, no account required.' },
             ].map((item, i) => (
               <FadeUp key={item.n} delay={i * 0.15}>
                 <motion.div
-                  whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-                  style={{ padding: '40px 32px 40px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderRadius: 4 }}
+                  whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 48, padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.08)', alignItems: 'start' }}
                 >
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: '#60A5FA', marginBottom: 20 }}>STEP {item.n}</p>
-                  <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#FFFFFF', lineHeight: 1.2, marginBottom: 14, fontWeight: 400 }}>{item.title}</h3>
-                  <p style={{ fontSize: 15, lineHeight: 1.8, color: 'rgba(255,255,255,0.65)' }}>{item.desc}</p>
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: 'rgba(255,255,255,0.3)', marginBottom: 16, fontFamily: 'monospace' }}>[ {item.n} ]</p>
+                    <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', color: '#FFFFFF', lineHeight: 1.1, fontWeight: 300 }}>{item.title}</h3>
+                  </div>
+                  <p style={{ fontSize: 16, lineHeight: 1.85, color: 'rgba(255,255,255,0.6)', paddingTop: 40 }}>{item.desc}</p>
                 </motion.div>
               </FadeUp>
             ))}
@@ -353,7 +356,7 @@ export default function Home() {
 
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Why Home Reach</p>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 03 ] &mdash;&mdash; WHY HOME REACH</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
           </FadeUp>
           {/* Staggered grid */}
@@ -404,7 +407,7 @@ export default function Home() {
       <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Coverage</p>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 04 ] &mdash;&mdash; COVERAGE</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117', fontWeight: 300 }}>All of Essex County.</h2>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: '#475569', maxWidth: 560, marginBottom: 48 }}>From Newark high-rises to Caldwell garden apartments. If it is affordable housing in Essex County, we track it.</p>
           </FadeUp>
