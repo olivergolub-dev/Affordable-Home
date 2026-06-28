@@ -531,6 +531,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* DISCLAIMER BAR */}
+      <div style={{ backgroundColor: '#060E1A', padding: '16px clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', maxWidth: 1280, margin: '0 auto', lineHeight: 1.6 }}>
+          Home Reach is an informational tool only. Listing availability and eligibility requirements are subject to change. Always verify details directly with the housing provider before applying. This is not legal advice and does not guarantee housing placement.
+        </p>
+      </div>
       {/* FOOTER */}
       <footer style={{ backgroundColor: '#0A1628', padding: 'clamp(32px, 4vw, 48px) clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
@@ -546,13 +552,13 @@ export default function Home() {
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', maxWidth: 280, lineHeight: 1.7 }}>Essex County's free housing guide. Connecting residents to affordable programs and income-qualified listings.</p>
             </div>
             <div style={{ display: 'flex', gap: 32 }}>
-              {['Privacy', 'Contact', 'Data sources'].map(link => (
-                <a key={link} href="#" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>{link}</a>
+              {[{label: 'Privacy', href: '/privacy'}, {label: 'Contact', href: 'mailto:olivergolub@gmail.com'}, {label: 'Data sources', href: '/about'}].map(link => (
+                <a key={link.label} href={link.href} style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>{link.label}</a>
               ))}
             </div>
           </div>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24 }}>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>2025 Home Reach · Essex County, NJ · Not a government agency</p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>© 2026 Home Reach · Essex County, NJ · Not a government agency</p>
           </div>
         </div>
       </footer>
