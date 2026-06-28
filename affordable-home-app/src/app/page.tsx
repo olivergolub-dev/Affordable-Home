@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -97,48 +97,9 @@ function ParticleCanvas() {
 }
 
 
-function CursorGlow() {
-  const [pos, setPos] = useState({ x: -200, y: -200 });
-  const [visible, setVisible] = useState(false);
-
-  const handleMove = useCallback((e: MouseEvent) => {
-    setPos({ x: e.clientX, y: e.clientY });
-    setVisible(true);
-  }, []);
-
-  const handleLeave = useCallback(() => setVisible(false), []);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseleave', handleLeave);
-    return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseleave', handleLeave);
-    };
-  }, [handleMove, handleLeave]);
-
-  return (
-    <div style={{
-      position: 'fixed',
-      left: pos.x,
-      top: pos.y,
-      width: 400,
-      height: 400,
-      borderRadius: '50%',
-      background: 'radial-gradient(circle, rgba(96,165,250,0.08) 0%, rgba(96,165,250,0.03) 40%, transparent 70%)',
-      transform: 'translate(-50%, -50%)',
-      pointerEvents: 'none',
-      zIndex: 9999,
-      transition: 'opacity 0.3s ease',
-      opacity: visible ? 1 : 0,
-    }} />
-  );
-}
-
 export default function Home() {
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#0D1117' }}>
-      <CursorGlow />
 
       {/* NAV */}
       <motion.header
