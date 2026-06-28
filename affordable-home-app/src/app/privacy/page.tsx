@@ -9,8 +9,8 @@ export default function Privacy() {
         {[
           { title: 'No account required', body: 'Home Reach does not require you to create an account. You can use the eligibility wizard and view results without registering or logging in.' },
           { title: 'What we collect', body: 'When you use the eligibility wizard, your answers are stored temporarily in your browser session only. This data is never sent to our servers and disappears automatically when you close the tab.' },
-          { title: 'No sensitive data stored', body: 'We do not store your income, household size, voucher status, or any other personal details you enter into the wizard. If you choose to provide an email address for results, it is used once to send your results and then discarded - never saved.' },
-          { title: 'Analytics', body: 'We use basic analytics to understand how people use Home Reach - for example, how many people complete the wizard or click on a listing. This data is aggregated and anonymous. We do not track individuals.' },
+          { title: 'No sensitive data stored', body: 'We do not store your income, household size, voucher status, or any other personal details you enter into the wizard. If you choose to provide an email address for results, it is used once to send your results and then discarded. It is never saved.' },
+          { title: 'Analytics', body: 'We use basic analytics to understand how people use Home Reach; for example, how many people complete the wizard or click on a listing. This data is aggregated and anonymous. We do not track individuals.' },
           { title: 'Third-party links', body: 'Home Reach links to external housing providers, housing authorities, and application portals. We are not responsible for the privacy practices of those sites. Always review their policies before submitting personal information.' },
           { title: 'Children', body: 'Home Reach is not directed at children under 13. We do not knowingly collect any information from children.' },
           { title: 'Contact', body: 'Questions about this policy? Email olivergolub@gmail.com.' },
