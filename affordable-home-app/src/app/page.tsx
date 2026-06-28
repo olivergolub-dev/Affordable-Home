@@ -251,6 +251,76 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* ESSEX COUNTY CONTEXT */}
+      <section style={{ backgroundColor: '#071020', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -120, right: -120, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,64,175,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
+          <FadeUp>
+            <p style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.16em', marginBottom: 40 }}>[ 00 ] &mdash;&mdash; WHY THIS MATTERS</p>
+          </FadeUp>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}>
+            {/* Left - scale of problem */}
+            <FadeUp delay={0.1}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
+                  The scale of Essex County's housing crisis.
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                  {[
+                    { stat: '863K', label: 'Residents', sub: '3rd most populated county in NJ' },
+                    { stat: '55–60%', label: 'Renter-occupied', sub: 'Unusually high for a NJ county' },
+                    { stat: '26%', label: 'Severe housing problems', sub: 'Cost burden or overcrowding' },
+                    { stat: '115K', label: 'Below the poverty line', sub: '13.4% of all residents' },
+                  ].map((item, i) => (
+                    <div key={item.stat} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>{item.label}</p>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FadeUp>
+
+            {/* Right - the gap */}
+            <FadeUp delay={0.2}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
+                  The gap between income and housing costs.
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                  {[
+                    { stat: '$80K', label: 'Median household income', sub: 'Far below what homeownership requires' },
+                    { stat: '$524K', label: 'Median property value', sub: 'Homeownership out of reach for most renters' },
+                    { stat: '44.9%', label: 'Homeownership rate', sub: 'One of the lowest in the state' },
+                    { stat: '303+', label: 'Affordable units exist', sub: 'Most residents do not know where to find them' },
+                  ].map((item, i) => (
+                    <div key={item.stat} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#60A5FA', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>{item.label}</p>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FadeUp>
+          </div>
+
+          <FadeUp delay={0.3}>
+            <div style={{ marginTop: 64, paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, maxWidth: 800 }}>
+                Year 1 concentrates on <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Newark, East Orange, and Irvington</span> — roughly 450K residents sharing high rentership, low incomes, and severe cost burden. Home Reach launches with full English coverage across all 22 municipalities.
+              </p>
+            </div>
+          </FadeUp>
+        </div>
+      </section>
+
       {/* TICKER */}
       <Ticker />
 
