@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -18,6 +18,84 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   );
 }
 
+function ParticleCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number }[] = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.4 + 0.1,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(147, 197, 253, ${p.opacity})`;
+        ctx.fill();
+
+        // Draw lines between nearby particles
+        particles.slice(i + 1).forEach(p2 => {
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(147, 197, 253, ${0.08 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}
+    />
+  );
+}
+
 export default function Home() {
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#0D1117' }}>
@@ -29,7 +107,7 @@ export default function Home() {
         transition={{ duration: 0.8 }}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-          backgroundColor: 'rgba(10, 22, 40, 0.8)',
+          backgroundColor: 'rgba(10, 22, 40, 0.85)',
           backdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(255,255,255,0.07)',
         }}
@@ -54,9 +132,14 @@ export default function Home() {
 
       {/* HERO */}
       <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 clamp(20px, 5vw, 48px) clamp(60px, 8vw, 100px)', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', backgroundAttachment: 'fixed', filter: 'brightness(0.38)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,22,40,0.97) 0%, rgba(10,22,40,0.35) 60%, rgba(10,22,40,0.15) 100%)' }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        {/* Photo background */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', filter: 'brightness(0.28)' }} />
+        {/* Dark gradient */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,22,40,0.98) 0%, rgba(10,22,40,0.5) 50%, rgba(10,22,40,0.25) 100%)', zIndex: 0 }} />
+        {/* Particles */}
+        <ParticleCanvas />
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', width: '100%' }}>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.6, delay: 0.2, ease: [0.06, 0.6, 0.12, 1.0] }}
             style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#93C5FD', marginBottom: 28 }}>
             Essex County, NJ · Free, Always
@@ -98,12 +181,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHAT YOU'LL FIND - light */}
-      <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
+      {/* WHAT YOU'LL FIND */}
+      <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>What you'll find</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 64, color: '#0D1117', fontWeight: 300 }}>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>
               Trusted guidance for every affordable housing pathway.
             </h2>
           </FadeUp>
@@ -114,9 +197,9 @@ export default function Home() {
               { label: 'Open waitlists', desc: 'Real-time status and direct links to official applications.' },
             ].map((item, i) => (
               <FadeUp key={item.label} delay={i * 0.12}>
-                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 32 }}>
+                <div style={{ borderTop: '2px solid #0D1117', paddingTop: 32 }}>
                   <div style={{ width: 36, height: 36, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: 'white', fontSize: 14, fontWeight: 700 }}>✓</div>
-                  <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.35rem', marginBottom: 12, color: '#0D1117', fontStyle: 'italic', fontWeight: 400 }}>{item.label}</p>
+                  <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.4rem', marginBottom: 12, color: '#0D1117', fontWeight: 400 }}>{item.label}</p>
                   <p style={{ fontSize: 15, lineHeight: 1.8, color: '#475569' }}>{item.desc}</p>
                 </div>
               </FadeUp>
@@ -125,12 +208,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HOW IT WORKS - dark */}
-      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
+      {/* HOW IT WORKS */}
+      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#93C5FD', marginBottom: 16 }}>How it works</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 80, fontWeight: 300 }}>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 64, fontWeight: 300 }}>
               Three steps. No guesswork.
             </h2>
           </FadeUp>
@@ -141,26 +224,25 @@ export default function Home() {
               { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application. No middleman.' },
             ].map((item, i) => (
               <FadeUp key={item.n} delay={i * 0.15}>
-                <div style={{ padding: '40px 32px 40px 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: '#1E40AF', marginBottom: 20 }}>STEP {item.n}</p>
-                  <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#FFFFFF', lineHeight: 1.2, marginBottom: 14, fontWeight: 300, fontStyle: 'italic' }}>{item.title}</h3>
+                <div style={{ padding: '40px 32px 40px 0', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: '#60A5FA', marginBottom: 20 }}>STEP {item.n}</p>
+                  <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#FFFFFF', lineHeight: 1.2, marginBottom: 14, fontWeight: 400 }}>{item.title}</h3>
                   <p style={{ fontSize: 15, lineHeight: 1.8, color: 'rgba(255,255,255,0.65)' }}>{item.desc}</p>
                 </div>
               </FadeUp>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* WHY AFFORDABLE HOME - light */}
-      <section style={{ backgroundColor: '#F8FAFC', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
+      {/* WHY AFFORDABLE HOME */}
+      <section style={{ backgroundColor: '#F8FAFC', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Why Affordable Home</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 64, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
           </FadeUp>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {[
               { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.' },
               { title: 'Verified data', text: 'Every listing shows its source and last-verified date.' },
@@ -170,7 +252,7 @@ export default function Home() {
               { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.' },
             ].map((item, i) => (
               <FadeUp key={item.title} delay={i * 0.07}>
-                <div style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: '28px 24px', border: '1px solid #E2E8F0' }}>
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: 12, padding: '28px 24px', border: '1px solid #E2E8F0', height: '100%' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     <span style={{ width: 24, height: 24, borderRadius: 4, backgroundColor: '#1E40AF', color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
                     <div>
@@ -185,22 +267,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COVERAGE - light */}
-      <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 120px) clamp(20px, 5vw, 48px)' }}>
+      {/* COVERAGE */}
+      <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1D3A8A', marginBottom: 16 }}>Coverage</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117', fontWeight: 300 }}>All of Essex County.</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#475569', maxWidth: 560, marginBottom: 56 }}>From Newark high-rises to Caldwell garden apartments. If it is affordable housing in Essex County, we track it.</p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#475569', maxWidth: 560, marginBottom: 48 }}>From Newark high-rises to Caldwell garden apartments. If it is affordable housing in Essex County, we track it.</p>
           </FadeUp>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 56 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 48 }}>
             {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland', 'West Caldwell'].map((town, i) => (
-              <FadeUp key={town} delay={i * 0.03}>
-                <div style={{ border: '1px solid #E8EDF5', borderRadius: 10, padding: '14px 18px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#FFFFFF', letterSpacing: '0.01em' }}>{town}</div>
+              <FadeUp key={town} delay={i * 0.02}>
+                <div style={{ border: '1px solid #E8EDF5', borderRadius: 8, padding: '12px 14px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#F8FAFC', textAlign: 'center' }}>{town}</div>
               </FadeUp>
             ))}
           </div>
-
         </div>
       </section>
 
