@@ -532,8 +532,8 @@ export default function Home() {
       </section>
 
       {/* DISCLAIMER BAR */}
-      <div style={{ backgroundColor: '#060E1A', padding: '16px clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', maxWidth: 1280, margin: '0 auto', lineHeight: 1.6 }}>
+      <div style={{ backgroundColor: '#F7F8FA', padding: '16px clamp(20px, 5vw, 48px)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+        <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)', maxWidth: 1280, margin: '0 auto', lineHeight: 1.6 }}>
           Home Reach is an informational tool only. Listing availability and eligibility requirements are subject to change. Always verify details directly with the housing provider before applying. This is not legal advice and does not guarantee housing placement.
         </p>
       </div>
