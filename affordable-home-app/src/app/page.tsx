@@ -253,11 +253,11 @@ export default function Home() {
 
 
       {/* ESSEX COUNTY CONTEXT */}
-      <section style={{ backgroundColor: '#071020', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ backgroundColor: '#0D1F38', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -120, right: -120, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,64,175,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.16em', marginBottom: 40 }}>[ 00 ] &mdash;&mdash; WHY THIS MATTERS</p>
+            <p style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.16em', marginBottom: 40 }}>[ 00 ] &mdash;&mdash; WHY ESSEX COUNTY</p>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}>
             {/* Left - scale of problem */}
@@ -311,13 +311,7 @@ export default function Home() {
             </FadeUp>
           </div>
 
-          <FadeUp delay={0.3}>
-            <div style={{ marginTop: 64, paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, maxWidth: 800 }}>
-                Year 1 concentrates on <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Newark, East Orange, and Irvington</span> — roughly 450K residents sharing high rentership, low incomes, and severe cost burden. Home Reach launches with full English coverage across all 22 municipalities.
-              </p>
-            </div>
-          </FadeUp>
+
         </div>
       </section>
 
