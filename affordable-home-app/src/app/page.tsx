@@ -293,7 +293,7 @@ export default function Home() {
                   transition={{ duration: 0.2 }}
                   style={{ borderTop: '2px solid #0D1117', paddingTop: 32 }}
                 >
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#1E40AF', marginBottom: 24 }} />
+                  <div style={{ width: 36, height: 36, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: 'white', fontSize: 14, fontWeight: 700 }}>✓</div>
                   <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.4rem', marginBottom: 12, color: '#0D1117', fontWeight: 400 }}>{item.label}</p>
                   <p style={{ fontSize: 15, lineHeight: 1.8, color: '#475569' }}>{item.desc}</p>
                 </motion.div>
@@ -359,12 +359,12 @@ export default function Home() {
           {/* Staggered grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, alignItems: 'start' }}>
             {[
-              { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.', offset: 0 },
-              { title: 'Verified data', text: 'Every listing shows its source and last-verified date.', offset: 24 },
-              { title: 'Hyper-local', text: 'Newark, East Orange, Irvington, and all 22 municipalities.', offset: 0 },
-              { title: 'Private by design', text: 'Your answers stay in your browser. No account, no tracking.', offset: 24 },
-              { title: 'Always current', text: 'Listings re-verified and waitlist statuses kept up to date.', offset: 0 },
-              { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.', offset: 24 },
+              { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.' },
+              { title: 'Verified data', text: 'Every listing shows its source and last-verified date.' },
+              { title: 'Hyper-local', text: 'Newark, East Orange, Irvington, and all 22 municipalities.' },
+              { title: 'Private by design', text: 'Your answers stay in your browser. No account, no tracking.' },
+              { title: 'Always current', text: 'Listings re-verified and waitlist statuses kept up to date.' },
+              { title: 'Independent', text: 'Not a landlord, not a broker, not a government agency.' },
             ].map((item, i) => (
               <FadeUp key={item.title} delay={i * 0.07}>
                 <motion.div
@@ -376,12 +376,11 @@ export default function Home() {
                     borderRadius: 12,
                     padding: '28px 24px',
                     border: '1px solid rgba(255,255,255,0.9)',
-                    marginTop: item.offset,
                     cursor: 'default',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#1E40AF', flexShrink: 0, marginTop: 6 }} />
+                    <span style={{ width: 22, height: 22, borderRadius: 4, backgroundColor: '#1E40AF', color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
                     <div>
                       <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0D1117' }}>{item.title}</p>
                       <p style={{ fontSize: 14, lineHeight: 1.7, color: '#475569' }}>{item.text}</p>
