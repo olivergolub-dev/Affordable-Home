@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -96,9 +96,49 @@ function ParticleCanvas() {
   );
 }
 
+
+function CursorGlow() {
+  const [pos, setPos] = useState({ x: -200, y: -200 });
+  const [visible, setVisible] = useState(false);
+
+  const handleMove = useCallback((e: MouseEvent) => {
+    setPos({ x: e.clientX, y: e.clientY });
+    setVisible(true);
+  }, []);
+
+  const handleLeave = useCallback(() => setVisible(false), []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseleave', handleLeave);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseleave', handleLeave);
+    };
+  }, [handleMove, handleLeave]);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      left: pos.x,
+      top: pos.y,
+      width: 400,
+      height: 400,
+      borderRadius: '50%',
+      background: 'radial-gradient(circle, rgba(96,165,250,0.08) 0%, rgba(96,165,250,0.03) 40%, transparent 70%)',
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+      zIndex: 9999,
+      transition: 'opacity 0.3s ease',
+      opacity: visible ? 1 : 0,
+    }} />
+  );
+}
+
 export default function Home() {
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#0D1117' }}>
+      <CursorGlow />
 
       {/* NAV */}
       <motion.header
@@ -133,7 +173,7 @@ export default function Home() {
       {/* HERO */}
       <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 clamp(20px, 5vw, 48px) clamp(60px, 8vw, 100px)', overflow: 'hidden' }}>
         {/* Photo background */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', filter: 'brightness(0.28)' }} />
+        <motion.div initial={{ scale: 1 }} animate={{ scale: 1.08 }} transition={{ duration: 20, ease: 'linear', repeat: Infinity, repeatType: 'reverse' }} style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 30%', filter: 'brightness(0.28)' }} />
         {/* Dark gradient */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,22,40,0.98) 0%, rgba(10,22,40,0.5) 50%, rgba(10,22,40,0.25) 100%)', zIndex: 0 }} />
         {/* Particles */}
