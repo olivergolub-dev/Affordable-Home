@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import posthog from 'posthog-js';
 
 const options = [
   { value: '1', label: '1 person' },
@@ -42,7 +43,7 @@ export default function WizardStep1() {
           {options.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => { sessionStorage.setItem('wizard_household_size', opt.value); router.push('/wizard/step2'); }}
+              onClick={() => { sessionStorage.setItem('wizard_household_size', opt.value); posthog.capture('wizard_household_size_selected', { household_size: opt.value, step: 1 }); router.push('/wizard/step2'); }}
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '20px 24px', textAlign: 'left', fontSize: 18, color: '#FFFFFF', cursor: 'pointer', fontFamily: 'var(--font-dm-serif)', fontWeight: 300, transition: 'all 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = '#1E40AF'; e.currentTarget.style.borderColor = '#1E40AF'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}

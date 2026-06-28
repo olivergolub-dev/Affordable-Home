@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from 'posthog-js';
 
 const options = ['Senior (62+)', 'Veteran', 'Person with a disability', 'Experiencing homelessness', 'None of the above'];
 
@@ -54,7 +55,7 @@ export default function WizardStep6() {
           ))}
         </div>
         <button
-          onClick={() => { sessionStorage.setItem('wizard_circumstances', JSON.stringify(selected)); router.push('/wizard/step7'); }}
+          onClick={() => { sessionStorage.setItem('wizard_circumstances', JSON.stringify(selected)); posthog.capture('wizard_circumstances_selected', { circumstances: selected, step: 6 }); router.push('/wizard/step7'); }}
           style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
         >
           Continue

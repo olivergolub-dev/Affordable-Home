@@ -2,6 +2,7 @@
 
 import { motion, useInView, useScroll } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -239,7 +240,7 @@ export default function Home() {
             <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>How it works</a>
             <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Coverage</a>
           </nav>
-          <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 22px', borderRadius: 6, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
+          <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 22px', borderRadius: 6, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
             Check Eligibility
           </a>
         </div>
@@ -281,7 +282,7 @@ export default function Home() {
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.6, delay: 1.4, ease: [0.06, 0.6, 0.12, 1.0] }}
             style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '16px 36px', borderRadius: 6, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+            <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'hero' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '16px 36px', borderRadius: 6, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
               Check My Eligibility
             </a>
             <a href="/results" style={{ color: '#FFFFFF', fontSize: 14, fontWeight: 500, textDecoration: 'none', letterSpacing: '0.02em', opacity: 0.85 }}>

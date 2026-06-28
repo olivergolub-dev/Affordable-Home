@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from 'posthog-js';
 
 const options = ['Yes, I have a Section 8 voucher', 'No, I do not have a voucher', 'I am not sure'];
 
@@ -37,7 +38,7 @@ export default function WizardStep5() {
           {options.map(opt => (
             <button
               key={opt}
-              onClick={() => { setSelected(opt); sessionStorage.setItem('wizard_voucher', opt); router.push('/wizard/step6'); }}
+              onClick={() => { setSelected(opt); sessionStorage.setItem('wizard_voucher', opt); posthog.capture('wizard_voucher_selected', { voucher_status: opt, step: 5 }); router.push('/wizard/step6'); }}
               style={{
                 background: selected === opt ? '#1E40AF' : 'rgba(255,255,255,0.04)',
                 border: selected === opt ? '1px solid #1E40AF' : '1px solid rgba(255,255,255,0.1)',

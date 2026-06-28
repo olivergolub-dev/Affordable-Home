@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from 'posthog-js';
 
 export default function WizardStep7() {
   const router = useRouter();
@@ -42,13 +43,13 @@ export default function WizardStep7() {
         />
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>We never sell or store your email.</p>
         <button
-          onClick={() => { sessionStorage.setItem('wizard_email', email); router.push('/results'); }}
+          onClick={() => { sessionStorage.setItem('wizard_email', email); if (email) { posthog.identify(email, { email }); } posthog.capture('eligibility_wizard_completed', { provided_email: !!email, step: 7 }); router.push('/results'); }}
           style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%', marginBottom: 12 }}
         >
           See my matches
         </button>
         <button
-          onClick={() => router.push('/results')}
+          onClick={() => { posthog.capture('eligibility_wizard_completed', { provided_email: false, step: 7 }); router.push('/results'); }}
           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: 14, cursor: 'pointer', width: '100%', padding: '8px' }}
         >
           Skip and see results

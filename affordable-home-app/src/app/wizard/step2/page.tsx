@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from 'posthog-js';
 
 export default function WizardStep2() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function WizardStep2() {
         />
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>Annual household income before taxes</p>
         <button
-          onClick={() => router.push('/wizard/step3')}
+          onClick={() => { posthog.capture('wizard_income_submitted', { has_income: !!income, step: 2 }); router.push('/wizard/step3'); }}
           style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
         >
           Continue

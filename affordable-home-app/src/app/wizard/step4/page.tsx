@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from 'posthog-js';
 
 const towns = ['Any Essex County municipality','Newark','East Orange','Irvington','Orange','West Orange','Montclair','Bloomfield','Belleville','Nutley','Maplewood','South Orange','Livingston','Caldwell','Verona','Cedar Grove','Glen Ridge','Essex Fells','Fairfield','Millburn','North Caldwell','Roseland','West Caldwell'];
 
@@ -50,7 +51,7 @@ export default function WizardStep4() {
           ))}
         </div>
         <button
-          onClick={() => { sessionStorage.setItem('wizard_towns', JSON.stringify(selected)); router.push('/wizard/step5'); }}
+          onClick={() => { sessionStorage.setItem('wizard_towns', JSON.stringify(selected)); posthog.capture('wizard_towns_selected', { towns: selected, town_count: selected.length, step: 4 }); router.push('/wizard/step5'); }}
           style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
         >
           Continue

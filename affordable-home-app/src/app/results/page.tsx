@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 const availabilityOptions = ['All', 'Open', 'Waitlist'];
 const bedroomOptions = ['All', 'Studio', '1BR', '2BR', '3BR+'];
@@ -57,8 +58,8 @@ export default function ResultsPage() {
         .from('Home Reach')
         .select('name, city, bedrooms, rent, ami_band, wailist_open, application_link, program_type');
       if (!isMounted) return;
-      if (error) { setError(error.message); setListings([]); }
-      else { setListings(data ?? []); }
+      if (error) { setError(error.message); setListings([]); posthog.captureException(new Error(error.message)); }
+      else { setListings(data ?? []); posthog.capture('results_viewed', { listing_count: (data ?? []).length }); }
       setLoading(false);
     }
     loadListings();
@@ -131,7 +132,7 @@ export default function ResultsPage() {
               <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>{label}</span>
               <select
                 value={value}
-                onChange={e => setter(e.target.value)}
+                onChange={e => { setter(e.target.value); posthog.capture('results_filter_changed', { filter: label, value: e.target.value }); }}
                 style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
               >
                 {options.map(o => <option key={o}>{o}</option>)}
@@ -192,6 +193,7 @@ export default function ResultsPage() {
                     </span>
                     {listing.application_link ? (
                       <a href={listing.application_link} target="_blank" rel="noopener noreferrer"
+                        onClick={() => posthog.capture('listing_apply_clicked', { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type, ami_band: listing.ami_band })}
                         style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
                         Apply
                       </a>
