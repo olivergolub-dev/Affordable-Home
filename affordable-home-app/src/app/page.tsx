@@ -167,7 +167,47 @@ function GlassCard({ n, suffix, label, delay }: { n: number; suffix: string; lab
   );
 }
 
+
+function useCountUp(end: number, duration: number, startCounting: boolean): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!startCounting) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(eased * end);
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [startCounting, end, duration]);
+  return count;
+}
+
 export default function Home() {
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsStarted, setStatsStarted] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStatsStarted(true); },
+      { threshold: 0.3 }
+    );
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const cResidents = useCountUp(863, 2000, statsStarted);
+  const cIncome = useCountUp(80, 2000, statsStarted);
+  const cPropVal = useCountUp(524, 2100, statsStarted);
+  const cRenterLo = useCountUp(55, 1800, statsStarted);
+  const cRenterHi = useCountUp(60, 1800, statsStarted);
+  const cHousing = useCountUp(26, 1600, statsStarted);
+  const cHomeown = useCountUp(44.9, 2000, statsStarted);
+  const cPoverty = useCountUp(115, 1900, statsStarted);
+  const cUnits = useCountUp(303, 2200, statsStarted);
+
   return (
     <div style={{ backgroundColor: '#FFFFFF', color: '#0D1117' }}>
       <ScrollProgress />
@@ -268,12 +308,12 @@ export default function Home() {
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   {[
-                    { stat: '863K', label: 'Residents', sub: '3rd most populated county in NJ' },
-                    { stat: '55–60%', label: 'Renter-occupied', sub: 'Unusually high for a NJ county' },
-                    { stat: '26%', label: 'Severe housing problems', sub: 'Cost burden or overcrowding' },
-                    { stat: '115K', label: 'Below the poverty line', sub: '13.4% of all residents' },
+                    { stat: <>{Math.round(cResidents)}K</>, label: 'Residents', sub: '3rd most populated county in NJ' },
+                    { stat: <>{Math.round(cRenterLo)}&ndash;{Math.round(cRenterHi)}%</>, label: 'Renter-occupied', sub: 'Unusually high for a NJ county' },
+                    { stat: <>{Math.round(cHousing)}%</>, label: 'Severe housing problems', sub: 'Cost burden or overcrowding' },
+                    { stat: <>{Math.round(cPoverty)}K</>, label: 'Below the poverty line', sub: '13.4% of all residents' },
                   ].map((item, i) => (
-                    <div key={item.stat} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
                         <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>{item.label}</p>
@@ -293,12 +333,12 @@ export default function Home() {
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   {[
-                    { stat: '$80K', label: 'Median household income', sub: 'Far below what homeownership requires' },
-                    { stat: '$524K', label: 'Median property value', sub: 'Homeownership out of reach for most renters' },
-                    { stat: '44.9%', label: 'Homeownership rate', sub: 'One of the lowest in the state' },
-                    { stat: '303+', label: 'Affordable units exist', sub: 'Most residents do not know where to find them' },
+                    { stat: <>${Math.round(cIncome)}K</>, label: 'Median household income', sub: 'Far below what homeownership requires' },
+                    { stat: <>${Math.round(cPropVal)}K</>, label: 'Median property value', sub: 'Homeownership out of reach for most renters' },
+                    { stat: <>{cHomeown.toFixed(1)}%</>, label: 'Homeownership rate', sub: 'One of the lowest in the state' },
+                    { stat: <>{Math.round(cUnits)}+</>, label: 'Affordable units exist', sub: 'Most residents do not know where to find them' },
                   ].map((item, i) => (
-                    <div key={item.stat} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#60A5FA', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
                         <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>{item.label}</p>
