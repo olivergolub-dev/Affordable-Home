@@ -8,7 +8,7 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   return (
-    <motion.div
+        <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
       animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
@@ -235,8 +235,8 @@ export default function Home() {
               <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Essex County's free housing guide</span>
             </div>
           </a>
-          <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 500, flexWrap: 'wrap', overflow: 'hidden', maxWidth: 'calc(100vw - 220px)' }}>
-            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Browse Listings</a>
+          <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
+            <a href="/results" className="nav-link" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Browse Listings</a>
             <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>How it works</a>
             <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Coverage</a>
           </nav>
@@ -247,7 +247,7 @@ export default function Home() {
       </motion.header>
 
       {/* HERO */}
-      <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 clamp(20px, 5vw, 48px) clamp(60px, 8vw, 100px)', overflow: 'hidden' }}>
+      <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(100px, 15vw, 160px) clamp(20px, 5vw, 48px) clamp(60px, 8vw, 100px)', overflow: 'hidden' }}>
         <motion.div
           initial={{ scale: 1 }}
           animate={{ scale: 1.08 }}
