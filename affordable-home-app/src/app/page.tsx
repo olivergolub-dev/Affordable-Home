@@ -234,7 +234,7 @@ export default function Home() {
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block', whiteSpace: 'nowrap' }}>Home Reach</span>
             </div>
           </a>
-          <nav style={{ display: 'flex', gap: 16, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto' }}>
+          <nav className="hide-mobile" style={{ display: 'flex', gap: 16, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto' }}>
             <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Listings</a>
             <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>How it works</a>
             
