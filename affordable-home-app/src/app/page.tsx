@@ -232,7 +232,6 @@ export default function Home() {
             </div>
             <div>
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block' }}>Home Reach</span>
-              
             </div>
           </a>
           <nav style={{ display: 'flex', gap: 8, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
