@@ -231,13 +231,13 @@ export default function Home() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <div>
-              <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block' }}>Home Reach</span>
+              <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block', whiteSpace: 'nowrap' }}>Home Reach</span>
             </div>
           </a>
           <nav style={{ display: 'flex', gap: 8, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
             <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Listings</a>
             <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>How it works</a>
-            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Coverage</a>
+            
           </nav>
           <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 22px', borderRadius: 6, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
             Check Eligibility
