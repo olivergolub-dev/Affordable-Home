@@ -237,8 +237,8 @@ export default function Home() {
           </a>
           <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
             <a href="/results" className="nav-link" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Browse Listings</a>
-            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>How it works</a>
-            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none' }}>Coverage</a>
+            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>How it works</a>
+            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>Coverage</a>
           </nav>
           <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 22px', borderRadius: 6, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
             Check Eligibility
