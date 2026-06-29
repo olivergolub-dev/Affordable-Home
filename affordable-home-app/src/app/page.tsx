@@ -234,9 +234,10 @@ export default function Home() {
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block', whiteSpace: 'nowrap' }}>Home Reach</span>
             </div>
           </a>
-          <nav className="hide-mobile" style={{ display: 'flex', gap: 16, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto' }}>
-            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Listings</a>
-            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>How it works</a>
+          <nav className="hide-mobile" style={{ display: 'flex', gap: 32, fontSize: 14, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto', marginRight: 32 }}>
+            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>Listings</a>
+            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>How it works</a>
+            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>Coverage</a>
             
           </nav>
           <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
