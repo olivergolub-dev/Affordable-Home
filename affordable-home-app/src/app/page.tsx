@@ -465,7 +465,7 @@ export default function Home() {
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
           </FadeUp>
           {/* Staggered grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
             {[
               { title: 'Eligibility-first', text: 'We show you what you qualify for, not just what is available.' },
               { title: 'Verified data', text: 'Every listing shows its source and last-verified date.' },
