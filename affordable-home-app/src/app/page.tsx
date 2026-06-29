@@ -232,13 +232,13 @@ export default function Home() {
             </div>
             <div>
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block' }}>Home Reach</span>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Essex County's free housing guide</span>
+              
             </div>
           </a>
-          <nav style={{ display: 'flex', gap: 12, fontSize: 13, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
-            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>Listings</a>
-            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>How it works</a>
-            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>Coverage</a>
+          <nav style={{ display: 'flex', gap: 8, fontSize: 12, fontWeight: 500, flexWrap: 'nowrap', overflow: 'hidden' }}>
+            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Listings</a>
+            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>How it works</a>
+            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 12, whiteSpace: 'nowrap' }}>Coverage</a>
           </nav>
           <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 22px', borderRadius: 6, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
             Check Eligibility
