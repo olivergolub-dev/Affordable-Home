@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           <p style="color:#334155;font-size:15px;margin:0 0 24px 0;">Based on your answers, here are affordable housing options in Essex County that may fit your household.</p>
           ${listingCards}
           <div style="margin-top:32px;text-align:center;">
-            <a href="https://affordable-home.vercel.app/results" style="background:#1E40AF;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">View all listings</a>
+            <a href="https://homereach.site/results" style="background:#1E40AF;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">View all listings</a>
           </div>
           <p style="color:#94A3B8;font-size:12px;margin-top:32px;text-align:center;">Home Reach is a free, independent resource. We never store your email after sending.</p>
         </div>
