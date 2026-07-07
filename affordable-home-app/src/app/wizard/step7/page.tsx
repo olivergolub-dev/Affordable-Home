@@ -6,6 +6,33 @@ import posthog from 'posthog-js';
 export default function WizardStep7() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async () => {
+    posthog.capture('eligibility_wizard_completed', { provided_email: !!email, step: 7 });
+    if (email) {
+      posthog.identify(email, { email });
+      sessionStorage.setItem('wizard_email', email);
+      setSending(true);
+      try {
+        const answers = {
+          income: sessionStorage.getItem('wizard_income'),
+          household: sessionStorage.getItem('wizard_household'),
+          town: sessionStorage.getItem('wizard_town'),
+        };
+        await fetch('/api/send-results', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, answers }),
+        });
+      } catch (e) {
+        console.error('Email send failed', e);
+      }
+      setSending(false);
+    }
+    router.push('/results');
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0A1628', color: '#FFFFFF' }}>
       <header style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 clamp(16px,4vw,40px)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -43,10 +70,11 @@ export default function WizardStep7() {
         />
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>We never sell or store your email.</p>
         <button
-          onClick={() => { sessionStorage.setItem('wizard_email', email); if (email) { posthog.identify(email, { email }); } posthog.capture('eligibility_wizard_completed', { provided_email: !!email, step: 7 }); router.push('/results'); }}
-          style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%', marginBottom: 12 }}
+          onClick={handleSubmit}
+          disabled={sending}
+          style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: sending ? 'wait' : 'pointer', width: '100%', marginBottom: 12, opacity: sending ? 0.7 : 1 }}
         >
-          See my matches
+          {sending ? 'Sending...' : 'See my matches'}
         </button>
         <button
           onClick={() => { posthog.capture('eligibility_wizard_completed', { provided_email: false, step: 7 }); router.push('/results'); }}
