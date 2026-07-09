@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+import { TABLE_NAME, matchListings, type Listing } from '@/lib/matching';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function POST(req: NextRequest) {
   try {
     const { email, answers } = await req.json();
     if (!email) return NextResponse.json({ error: 'No email' }, { status: 400 });
 
-    const { data: listings } = await supabase.from('listings').select('*');
-    const matches = (listings || []).slice(0, 10);
+    const { data: listings } = await supabase.from(TABLE_NAME).select('*');
+    // Same eligibility + ranking the Results page uses, then top 10.
+    const matches = matchListings((listings ?? []) as Listing[], answers ?? {}).slice(0, 10);
 
     const listingCards = matches.map((l: any) => `
       <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:12px;padding:20px 24px;margin-bottom:12px;">

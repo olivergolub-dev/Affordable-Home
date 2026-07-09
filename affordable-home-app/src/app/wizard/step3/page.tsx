@@ -36,7 +36,7 @@ export default function WizardStep3() {
           {options.map(opt => (
             <button
               key={opt}
-              onClick={() => { sessionStorage.setItem('wizard_household_size', JSON.stringify([opt])); posthog.capture('wizard_bedrooms_selected', { bedrooms: opt, step: 3 }); router.push('/wizard/step4'); }}
+              onClick={() => { sessionStorage.setItem('wizard_bedrooms', opt); posthog.capture('wizard_bedrooms_selected', { bedrooms: opt, step: 3 }); router.push('/wizard/step4'); }}
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '20px 24px', textAlign: 'left', fontSize: 18, color: '#FFFFFF', cursor: 'pointer', fontFamily: 'var(--font-dm-serif)', fontWeight: 300 }}
               onMouseEnter={e => { e.currentTarget.style.background = '#1E40AF'; e.currentTarget.style.borderColor = '#1E40AF'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
