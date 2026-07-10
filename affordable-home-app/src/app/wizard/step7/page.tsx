@@ -15,10 +15,17 @@ export default function WizardStep7() {
       sessionStorage.setItem('wizard_email', email);
       setSending(true);
       try {
+        const parseArray = (key: string): string[] => {
+          try { return JSON.parse(sessionStorage.getItem(key) || '[]'); }
+          catch { return []; }
+        };
         const answers = {
-          income: sessionStorage.getItem('wizard_income'),
-          household: sessionStorage.getItem('wizard_household'),
-          town: sessionStorage.getItem('wizard_town'),
+          income: sessionStorage.getItem('wizard_income') || '',
+          householdSize: sessionStorage.getItem('wizard_household_size') || '',
+          bedrooms: sessionStorage.getItem('wizard_bedrooms') || '',
+          towns: parseArray('wizard_towns'),
+          voucher: sessionStorage.getItem('wizard_voucher') || '',
+          circumstances: parseArray('wizard_circumstances'),
         };
         await fetch('/api/send-results', {
           method: 'POST',

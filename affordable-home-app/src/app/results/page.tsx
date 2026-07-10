@@ -3,6 +3,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import posthog from 'posthog-js';
+import { TABLE_NAME, isEligible, relevanceScore, normalizeBedrooms, type WizardAnswers } from '@/lib/matching';
+
+// Map the wizard's bedroom answer to a filter-bar token.
+function bedroomFilterFromAnswer(answer: string | null): string {
+  const n = normalizeBedrooms(answer);
+  if (n === 0) return 'Studio';
+  if (n === 1) return '1BR';
+  if (n === 2) return '2BR';
+  if (n === 3) return '3BR+';
+  return 'All';
+}
 
 const availabilityOptions = ['All', 'Open', 'Waitlist'];
 const bedroomOptions = ['All', 'Studio', '1BR', '2BR', '3BR+'];
@@ -36,17 +47,24 @@ export default function ResultsPage() {
   const [availability, setAvailability] = useState('All');
   const [bedrooms, setBedrooms] = useState('All');
   const [ami, setAmi] = useState('All');
-  const [wizardAnswers, setWizardAnswers] = useState<any>({});
+  const [wizardAnswers, setWizardAnswers] = useState<WizardAnswers>({});
 
   useEffect(() => {
-    const answers = {
+    const parseArray = (key: string): string[] => {
+      try { return JSON.parse(sessionStorage.getItem(key) || '[]'); }
+      catch { return []; }
+    };
+    const answers: WizardAnswers = {
       income: sessionStorage.getItem('wizard_income') || '',
-      householdSize: JSON.parse(sessionStorage.getItem('wizard_household_size') || '[]'),
-      towns: JSON.parse(sessionStorage.getItem('wizard_towns') || '[]'),
+      householdSize: sessionStorage.getItem('wizard_household_size') || '',
+      bedrooms: sessionStorage.getItem('wizard_bedrooms') || '',
+      towns: parseArray('wizard_towns'),
       voucher: sessionStorage.getItem('wizard_voucher') || '',
-      circumstances: JSON.parse(sessionStorage.getItem('wizard_circumstances') || '[]'),
+      circumstances: parseArray('wizard_circumstances'),
     };
     setWizardAnswers(answers);
+    // Pre-select the bedroom filter from what they told us in the wizard.
+    setBedrooms(bedroomFilterFromAnswer(answers.bedrooms ?? ''));
   }, []);
 
   useEffect(() => {
@@ -55,8 +73,8 @@ export default function ResultsPage() {
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
-        .from('Home Reach')
-        .select('name, city, bedrooms, rent, ami_band, wailist_open, application_link, program_type');
+        .from(TABLE_NAME)
+        .select('name, city, bedrooms, rent, ami_band, voucher_accepted, accessibility, wailist_open, application_link, program_type');
       if (!isMounted) return;
       if (error) { setError(error.message); setListings([]); posthog.captureException(new Error(error.message)); }
       else { setListings(data ?? []); posthog.capture('results_viewed', { listing_count: (data ?? []).length }); }
@@ -66,31 +84,27 @@ export default function ResultsPage() {
     return () => { isMounted = false; };
   }, []);
 
-  const getAmiTier = (incomeStr: string) => {
-    const income = parseInt(incomeStr.replace(/[^0-9]/g, ''));
-    if (!income) return null;
-    if (income <= 30450) return '30%';
-    if (income <= 50750) return '50%';
-    if (income <= 60900) return '60%';
-    if (income <= 81200) return '80%';
-    return null;
-  };
-
   const filteredListings = useMemo(() => {
-    const userAmiTier = getAmiTier(wizardAnswers.income || '');
-    const userTowns: string[] = wizardAnswers.towns || [];
-    return listings.filter((listing) => {
-      const waitlistOpen = listing.wailist_open === true || String(listing.wailist_open) === 'true';
-      const townMatch = userTowns.length === 0 ||
-        userTowns.some((t: string) => t.toLowerCase().includes('any')) ||
-        userTowns.some((t: string) => listing.city?.toLowerCase().includes(t.toLowerCase()));
-      const amiMatch = ami === 'All' || !listing.ami_band || listing.ami_band.includes(ami.replace('%', ''));
-      const availabilityMatch = availability === 'All' ||
-        (availability === 'Open' && !waitlistOpen) ||
-        (availability === 'Waitlist' && waitlistOpen);
-      const bedroomsMatch = bedrooms === 'All' || listing.bedrooms === null || String(listing.bedrooms) === bedrooms;
-      return availabilityMatch && bedroomsMatch && amiMatch && townMatch;
-    });
+    // Effective answers = survey answers, with the bedroom filter as the
+    // source of truth (it's pre-seeded from the wizard, then user-adjustable).
+    const effective: WizardAnswers = {
+      ...wizardAnswers,
+      bedrooms: bedrooms === 'All' ? '' : bedrooms,
+    };
+    return listings
+      // Full survey-based match: income -> AMI tier, town, bedrooms, affordability.
+      .filter((listing) => isEligible(listing, effective))
+      // Manual filter-bar overrides (availability + AMI band label).
+      .filter((listing) => {
+        const waitlistOpen = listing.wailist_open === true || String(listing.wailist_open) === 'true';
+        const amiMatch = ami === 'All' || !listing.ami_band || listing.ami_band.includes(ami.replace('%', ''));
+        const availabilityMatch = availability === 'All' ||
+          (availability === 'Open' && !waitlistOpen) ||
+          (availability === 'Waitlist' && waitlistOpen);
+        return availabilityMatch && amiMatch;
+      })
+      // Best matches first (voucher fit, open, affordability, town, bedrooms).
+      .sort((a, b) => relevanceScore(b, effective) - relevanceScore(a, effective));
   }, [listings, availability, bedrooms, ami, wizardAnswers]);
 
   return (
