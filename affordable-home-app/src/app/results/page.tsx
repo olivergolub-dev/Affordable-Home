@@ -1,115 +1,101 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import posthog from 'posthog-js';
-import { TABLE_NAME, isEligible, relevanceScore, normalizeBedrooms, type WizardAnswers } from '@/lib/matching';
+import { fetchListings } from '@/lib/listings';
+import { matchListings, type MatchResult } from '@/lib/eligibility';
+import { readAnswers } from '@/lib/wizardStore';
+import type { BedroomToken, WizardAnswers } from '@/lib/types';
+import type { AmiBand } from '@/lib/incomeLimits';
 
-// Map the wizard's bedroom answer to a filter-bar token.
-function bedroomFilterFromAnswer(answer: string | null): string {
-  const n = normalizeBedrooms(answer);
-  if (n === 0) return 'Studio';
-  if (n === 1) return '1BR';
-  if (n === 2) return '2BR';
-  if (n === 3) return '3BR+';
-  return 'All';
+const availabilityOptions = ['All', 'Open', 'Waitlist'] as const;
+const bedroomFilterOptions: { label: string; token: BedroomToken | 'All' }[] = [
+  { label: 'All', token: 'All' },
+  { label: 'Studio', token: 'Studio' },
+  { label: '1BR', token: '1BR' },
+  { label: '2BR', token: '2BR' },
+  { label: '3BR+', token: '3BR' },
+];
+const amiFilterOptions: { label: string; band: AmiBand | 'All' }[] = [
+  { label: 'All', band: 'All' },
+  { label: '30%', band: 30 },
+  { label: '50%', band: 50 },
+  { label: '60%', band: 60 },
+  { label: '80%', band: 80 },
+];
+
+function formatRent(rent: number | null): string {
+  if (rent == null) return 'Contact for rent';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rent) + '/mo';
 }
 
-const availabilityOptions = ['All', 'Open', 'Waitlist'];
-const bedroomOptions = ['All', 'Studio', '1BR', '2BR', '3BR+'];
-const amiOptions = ['All', '30%', '50%', '60%', '80%'];
-
-function formatRent(rent: number | null | undefined) {
-  if (rent == null || rent === 0) return 'Contact for rent';
-  if (typeof rent === 'number') {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rent) + '/mo';
-  }
-  const normalized = String(rent).trim();
-  if (/^\$/.test(normalized)) return normalized.includes('/mo') ? normalized : `${normalized}/mo`;
-  if (/^\d+(\.\d+)?$/.test(normalized)) return `$${Number(normalized).toLocaleString('en-US')}/mo`;
-  return normalized;
-}
-
-function availabilityBadge(waitlistOpen: boolean | string | null | undefined) {
-  const isOpen = waitlistOpen === false || String(waitlistOpen) === 'false';
+function availabilityBadge(waitlistOpen: boolean) {
   return {
-    label: isOpen ? 'Open' : 'Waitlist',
-    bg: isOpen ? '#EFF6FF' : '#F0FDF4',
-    text: isOpen ? '#1E40AF' : '#166534',
-    border: isOpen ? '#BFDBFE' : '#BBF7D0',
+    label: waitlistOpen ? 'Open' : 'Waitlist',
+    bg: waitlistOpen ? '#EFF6FF' : '#F0FDF4',
+    text: waitlistOpen ? '#1E40AF' : '#166534',
+    border: waitlistOpen ? '#BFDBFE' : '#BBF7D0',
   };
 }
 
+function formatVerified(dateStr: string | null): string | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return null;
+  return `Verified ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+}
+
 export default function ResultsPage() {
-  const [listings, setListings] = useState<any[]>([]);
+  const [matches, setMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [availability, setAvailability] = useState('All');
-  const [bedrooms, setBedrooms] = useState('All');
-  const [ami, setAmi] = useState('All');
-  const [wizardAnswers, setWizardAnswers] = useState<WizardAnswers>({});
-
-  useEffect(() => {
-    const parseArray = (key: string): string[] => {
-      try { return JSON.parse(sessionStorage.getItem(key) || '[]'); }
-      catch { return []; }
-    };
-    const answers: WizardAnswers = {
-      income: sessionStorage.getItem('wizard_income') || '',
-      householdSize: sessionStorage.getItem('wizard_household_size') || '',
-      bedrooms: sessionStorage.getItem('wizard_bedrooms') || '',
-      towns: parseArray('wizard_towns'),
-      voucher: sessionStorage.getItem('wizard_voucher') || '',
-      circumstances: parseArray('wizard_circumstances'),
-    };
-    setWizardAnswers(answers);
-    // Pre-select the bedroom filter from what they told us in the wizard.
-    setBedrooms(bedroomFilterFromAnswer(answers.bedrooms ?? ''));
-  }, []);
+  const [availability, setAvailability] = useState<(typeof availabilityOptions)[number]>('All');
+  // answers is read once on mount and never changes for the life of this page,
+  // so a lazy initializer (not an effect) is the correct way to seed both it
+  // and the bedroom filter that defaults from it.
+  const [answers] = useState<WizardAnswers>(() => readAnswers());
+  const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>(() => answers.bedrooms ?? 'All');
+  const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
 
   useEffect(() => {
     let isMounted = true;
-    async function loadListings() {
+    async function load() {
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from(TABLE_NAME)
-        .select('name, city, bedrooms, rent, ami_band, voucher_accepted, accessibility, wailist_open, application_link, program_type');
+      const { listings, error: err } = await fetchListings();
       if (!isMounted) return;
-      if (error) { setError(error.message); setListings([]); posthog.captureException(new Error(error.message)); }
-      else { setListings(data ?? []); posthog.capture('results_viewed', { listing_count: (data ?? []).length }); }
+      if (err) {
+        setError(err);
+        setMatches([]);
+        posthog.captureException(new Error(err));
+      } else {
+        const results = matchListings(listings, answers);
+        setMatches(results);
+        posthog.capture('results_viewed', { listing_count: results.length });
+      }
       setLoading(false);
     }
-    loadListings();
+    load();
     return () => { isMounted = false; };
-  }, []);
+  }, [answers]);
 
-  const filteredListings = useMemo(() => {
-    // Effective answers = survey answers, with the bedroom filter as the
-    // source of truth (it's pre-seeded from the wizard, then user-adjustable).
-    const effective: WizardAnswers = {
-      ...wizardAnswers,
-      bedrooms: bedrooms === 'All' ? '' : bedrooms,
-    };
-    return listings
-      // Full survey-based match: income -> AMI tier, town, bedrooms, affordability.
-      .filter((listing) => isEligible(listing, effective))
-      // Manual filter-bar overrides (availability + AMI band label).
-      .filter((listing) => {
-        const waitlistOpen = listing.wailist_open === true || String(listing.wailist_open) === 'true';
-        const amiMatch = ami === 'All' || !listing.ami_band || listing.ami_band.includes(ami.replace('%', ''));
-        const availabilityMatch = availability === 'All' ||
-          (availability === 'Open' && !waitlistOpen) ||
-          (availability === 'Waitlist' && waitlistOpen);
-        return availabilityMatch && amiMatch;
-      })
-      // Best matches first (voucher fit, open, affordability, town, bedrooms).
-      .sort((a, b) => relevanceScore(b, effective) - relevanceScore(a, effective));
-  }, [listings, availability, bedrooms, ami, wizardAnswers]);
+  const filtered = useMemo(() => {
+    return matches.filter(({ listing }) => {
+      const availabilityMatch =
+        availability === 'All' ||
+        (availability === 'Open' && listing.waitlist_open) ||
+        (availability === 'Waitlist' && !listing.waitlist_open);
+      const bedroomMatch =
+        bedroomFilter === 'All' ||
+        listing.bedroom_types.length === 0 ||
+        listing.bedroom_types.includes(bedroomFilter);
+      const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
+      return availabilityMatch && bedroomMatch && amiMatch;
+    });
+  }, [matches, availability, bedroomFilter, amiFilter]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
-      {/* NAV */}
       <header style={{ backgroundColor: '#0A1628', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(16px, 4vw, 32px)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
@@ -125,55 +111,66 @@ export default function ResultsPage() {
       </header>
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)' }}>
-        {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 8, fontWeight: 400 }}>
             Your matches in Essex County
           </h1>
           <p style={{ fontSize: 16, color: '#334155' }}>
-            Based on your answers, here are the housing options that fit your household.
+            {answers.income != null
+              ? 'Based on your answers, here are the housing options that fit your household.'
+              : 'Browsing all listings. Take the eligibility quiz for matches tailored to your household.'}
           </p>
         </div>
 
-        {/* Filter Bar */}
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
-          {[
-            { label: 'Availability', value: availability, setter: setAvailability, options: availabilityOptions },
-            { label: 'Bedrooms', value: bedrooms, setter: setBedrooms, options: bedroomOptions },
-            { label: 'AMI Tier', value: ami, setter: setAmi, options: amiOptions },
-          ].map(({ label, value, setter, options }) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>{label}</span>
-              <select
-                value={value}
-                onChange={e => { setter(e.target.value); posthog.capture('results_filter_changed', { filter: label, value: e.target.value }); }}
-                style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
-              >
-                {options.map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
-          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Availability</span>
+            <select
+              value={availability}
+              onChange={(e) => { setAvailability(e.target.value as typeof availability); posthog.capture('results_filter_changed', { filter: 'Availability', value: e.target.value }); }}
+              style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
+            >
+              {availabilityOptions.map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Bedrooms</span>
+            <select
+              value={bedroomFilter}
+              onChange={(e) => { setBedroomFilter(e.target.value as BedroomToken | 'All'); posthog.capture('results_filter_changed', { filter: 'Bedrooms', value: e.target.value }); }}
+              style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
+            >
+              {bedroomFilterOptions.map((o) => <option key={o.token} value={o.token}>{o.label}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>AMI Tier</span>
+            <select
+              value={amiFilter}
+              onChange={(e) => { setAmiFilter(e.target.value === 'All' ? 'All' : (Number(e.target.value) as AmiBand)); posthog.capture('results_filter_changed', { filter: 'AMI Tier', value: e.target.value }); }}
+              style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
+            >
+              {amiFilterOptions.map((o) => <option key={o.label} value={o.band}>{o.label}</option>)}
+            </select>
+          </div>
           <div style={{ marginLeft: 'auto', fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-            {loading ? 'Loading...' : `${filteredListings.length} matches found`}
+            {loading ? 'Loading...' : `${filtered.length} matches found`}
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '16px 20px', marginBottom: 24, color: '#DC2626', fontSize: 14 }}>
             Failed to load listings: {error}
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#64748B', fontSize: 15 }}>
             Loading listings...
           </div>
         )}
 
-        {/* No results */}
-        {!loading && filteredListings.length === 0 && !error && (
+        {!loading && filtered.length === 0 && !error && (
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
             <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
             <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
@@ -183,22 +180,32 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {/* Listings */}
-        {!loading && filteredListings.length > 0 && (
+        {!loading && filtered.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filteredListings.map((listing, i) => {
-              const badge = availabilityBadge(listing.wailist_open);
+            {filtered.map(({ listing, reasons }) => {
+              const badge = availabilityBadge(listing.waitlist_open);
+              const verified = formatVerified(listing.last_verified);
               return (
-                <div key={i} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                <div key={listing.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
                       <span style={{ fontSize: 13, color: '#64748B' }}>{listing.city}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155' }}>
+                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155', marginBottom: reasons.length ? 8 : 0 }}>
                       <span>{formatRent(listing.rent)}</span>
-                      {listing.ami_band && <span>{listing.ami_band}</span>}
+                      {listing.ami_bands.length > 0 && <span>{listing.ami_bands.map((b) => `${b}%`).join('/')} AMI</span>}
                       {listing.program_type && <span>{listing.program_type}</span>}
+                    </div>
+                    {reasons.length > 0 && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                        {reasons.map((r) => (
+                          <span key={r} style={{ fontSize: 11, color: '#1E40AF', backgroundColor: '#EFF6FF', borderRadius: 4, padding: '2px 8px' }}>{r}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: '#94A3B8' }}>
+                      Source: {listing.source}{verified ? ` · ${verified}` : ''}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -207,7 +214,7 @@ export default function ResultsPage() {
                     </span>
                     {listing.application_link ? (
                       <a href={listing.application_link} target="_blank" rel="noopener noreferrer"
-                        onClick={() => posthog.capture('listing_apply_clicked', { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type, ami_band: listing.ami_band })}
+                        onClick={() => posthog.capture('listing_apply_clicked', { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type })}
                         style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
                         Apply
                       </a>

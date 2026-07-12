@@ -34,3 +34,19 @@ html {
 @media (max-width: 640px) {
   .hide-mobile { display: none !important; }
 }
+
+.wizard-option:hover,
+.wizard-option:focus-visible {
+  background: #1E40AF !important;
+  border-color: #1E40AF !important;
+}
+
+.wizard-option:focus-visible {
+  outline: 2px solid #93C5FD;
+  outline-offset: 2px;
+}
+
+.wizard-option-selected:hover {
+  background: #1E40AF !important;
+  border-color: #1E40AF !important;
+}

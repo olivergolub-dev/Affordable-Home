@@ -1,66 +1,51 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+'use client';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, ContinueButton } from '@/components/wizard/WizardShell';
+import { readAnswers, setPriorityGroups } from '@/lib/wizardStore';
+import type { PriorityGroup } from '@/lib/types';
 
-const options = ['Senior (62+)', 'Veteran', 'Person with a disability', 'Experiencing homelessness', 'None of the above'];
+const options: { label: string; value: PriorityGroup }[] = [
+  { label: 'Senior (62+)', value: 'senior' },
+  { label: 'Veteran', value: 'veteran' },
+  { label: 'Person with a disability', value: 'disability' },
+  { label: 'Experiencing homelessness', value: 'homeless' },
+];
 
 export default function WizardStep6() {
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>([]);
-  const toggle = (opt: string) => {
-    if (opt === 'None of the above') { setSelected(['None of the above']); return; }
-    setSelected(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev.filter(o => o !== 'None of the above'), opt]);
+  const [selected, setSelected] = useState<PriorityGroup[]>(() => readAnswers().priorityGroups);
+
+  useEffect(() => {
+    if (readAnswers().householdSize == null) router.replace('/wizard');
+  }, [router]);
+
+  const toggle = (value: PriorityGroup) => {
+    setSelected((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   };
+
+  const submit = () => {
+    setPriorityGroups(selected);
+    posthog.capture('wizard_circumstances_selected', { circumstances: selected, step: 6 });
+    router.push('/wizard/step7');
+  };
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0A1628', color: '#FFFFFF' }}>
-      <header style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 clamp(16px,4vw,40px)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em' }}>[ 06 / 07 ]</span>
-          <a href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Exit</a>
-        </div>
-      </header>
-      <div style={{ height: 2, backgroundColor: 'rgba(255,255,255,0.06)' }}>
-        <div style={{ width: '85.71%', height: '100%', background: 'linear-gradient(to right, #1E40AF, #60A5FA)' }} />
+    <WizardShell step={6} backHref="/wizard/step5">
+      <StepTitle>Do any of these apply to you?</StepTitle>
+      <StepSubtitle>Select all that apply. Some programs prioritize specific groups.</StepSubtitle>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+        {options.map((opt) => (
+          <OptionButton key={opt.value} selected={selected.includes(opt.value)} onClick={() => toggle(opt.value)}>
+            {opt.label}
+          </OptionButton>
+        ))}
+        <OptionButton selected={selected.length === 0} onClick={() => setSelected([])}>
+          None of the above
+        </OptionButton>
       </div>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(48px,8vw,80px) clamp(20px,5vw,40px)' }}>
-        <button onClick={() => router.push('/wizard/step5')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 16px', fontSize: 13, color: 'rgba(255,255,255,0.5)', cursor: 'pointer', marginBottom: 48 }}>← Back</button>
-        <p style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.16em', marginBottom: 20 }}>[ 06 ] &mdash;&mdash; STEP 6 OF 7</p>
-        <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 16, fontWeight: 300 }}>
-          Do any of these apply to you?
-        </h1>
-        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, marginBottom: 48 }}>
-          Select all that apply. Some programs prioritize specific groups.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-          {options.map(opt => (
-            <button
-              key={opt}
-              onClick={() => toggle(opt)}
-              style={{
-                background: selected.includes(opt) ? '#1E40AF' : 'rgba(255,255,255,0.04)',
-                border: selected.includes(opt) ? '1px solid #1E40AF' : '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 8, padding: '20px 24px', textAlign: 'left', fontSize: 16,
-                color: '#FFFFFF', cursor: 'pointer', fontFamily: 'var(--font-dm-serif)', fontWeight: 300
-              }}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={() => { sessionStorage.setItem('wizard_circumstances', JSON.stringify(selected)); posthog.capture('wizard_circumstances_selected', { circumstances: selected, step: 6 }); router.push('/wizard/step7'); }}
-          style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: 'pointer', width: '100%' }}
-        >
-          Continue
-        </button>
-      </div>
-    </div>
+      <ContinueButton onClick={submit}>Continue</ContinueButton>
+    </WizardShell>
   );
 }
