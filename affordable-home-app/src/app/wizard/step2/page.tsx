@@ -27,18 +27,22 @@ export default function WizardStep2() {
     <WizardShell step={2} backHref="/wizard">
       <StepTitle>What is your household&apos;s annual income?</StepTitle>
       <StepSubtitle>This determines which AMI tier you qualify for. Your answer is private and never stored beyond this session.</StepSubtitle>
+      <label htmlFor="income" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+        Annual household income
+      </label>
       <input
+        id="income"
         type="text"
         inputMode="numeric"
         placeholder="e.g. 45,000"
         value={income}
         onChange={(e) => setIncomeInput(e.target.value)}
-        aria-label="Annual household income"
+        aria-describedby="income-help"
         style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '20px 24px', fontSize: 20, color: '#FFFFFF', outline: 'none', boxSizing: 'border-box', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}
         onFocus={(e) => (e.currentTarget.style.borderColor = '#1E40AF')}
         onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
       />
-      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>Annual household income before taxes</p>
+      <p id="income-help" style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>Annual household income before taxes</p>
       <ContinueButton onClick={submit}>Continue</ContinueButton>
     </WizardShell>
   );

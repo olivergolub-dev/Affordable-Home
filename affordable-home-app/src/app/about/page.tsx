@@ -1,3 +1,12 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'About & Data Sources',
+  description:
+    'Why Home Reach exists, the scale of the housing crisis in Essex County, NJ, and the verified public sources behind every listing.',
+};
+
 export default function About() {
   return (
     <main style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
@@ -8,9 +17,9 @@ export default function About() {
 
         <div style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
           <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#0A1628', marginBottom: 16 }}>Why we built this</h2>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>Home Reach started in West Orange, New Jersey, where my grandmother Susan spent 24 years as the township's Director of Planning and Development - shaping the public policies that created the affordable housing stock Essex County residents depend on today.</p>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>The tools to help people find that housing never kept pace with the policy. New Jersey's official search tool, the NJ Housing Resource Center, launched in 2005 and operates primarily as a landlord posting registry. What's missing is an eligibility-first experience - where a family enters their household profile and sees every program they qualify for, along with every unit and waitlist.</p>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>In March 2024, New Jersey enacted A4/S50, the most significant overhaul of state affordable housing policy in decades. This triggered a decade of new construction across Essex County. The state's primary search tool was built in 2005. Home Reach is the attempt to close that gap.</p>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>Home Reach started in West Orange, New Jersey, where my grandmother Susan spent 24 years as the township&apos;s Director of Planning and Development - shaping the public policies that created the affordable housing stock Essex County residents depend on today.</p>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>The tools to help people find that housing never kept pace with the policy. New Jersey&apos;s official search tool, the NJ Housing Resource Center, launched in 2005 and operates primarily as a landlord posting registry. What&apos;s missing is an eligibility-first experience - where a family enters their household profile and sees every program they qualify for, along with every unit and waitlist.</p>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>In March 2024, New Jersey enacted A4/S50, the most significant overhaul of state affordable housing policy in decades. This triggered a decade of new construction across Essex County. The state&apos;s primary search tool was built in 2005. Home Reach is the attempt to close that gap.</p>
         </div>
 
         <div style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
@@ -59,7 +68,7 @@ export default function About() {
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>Questions, corrections, or feedback? Email <a href="mailto:olivergolub@gmail.com" style={{ color: '#1E3A5F' }}>olivergolub@gmail.com</a>.</p>
         </div>
 
-        <a href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</a>
+        <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
       </div>
     </main>
   );

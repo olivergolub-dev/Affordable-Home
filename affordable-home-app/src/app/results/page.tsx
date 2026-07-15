@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
@@ -98,15 +99,15 @@ export default function ResultsPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
       <header style={{ backgroundColor: '#0A1628', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(16px, 4vw, 32px)', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <div style={{ width: 30, height: 30, borderRadius: 7, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
-          </a>
-          <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          </Link>
+          <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
             Retake Quiz
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -174,9 +175,9 @@ export default function ResultsPage() {
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
             <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
             <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
-            <a href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
+            <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
               Retake the quiz
-            </a>
+            </Link>
           </div>
         )}
 

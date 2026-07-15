@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
-import { WizardShell, StepTitle, StepSubtitle, OptionButton } from '@/components/wizard/WizardShell';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup } from '@/components/wizard/WizardShell';
 import { readAnswers, setBedrooms } from '@/lib/wizardStore';
 import type { BedroomToken } from '@/lib/types';
 
@@ -33,13 +33,13 @@ export default function WizardStep3() {
     <WizardShell step={3} backHref="/wizard/step2">
       <StepTitle>How many bedrooms do you need?</StepTitle>
       <StepSubtitle>Select the option that best fits your household.</StepSubtitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+      <OptionGroup role="radiogroup" label="Bedrooms needed" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
         {options.map((opt) => (
-          <OptionButton key={opt.token} selected={selected === opt.token} onClick={() => choose(opt.token, opt.label)}>
+          <OptionButton key={opt.token} role="radio" selected={selected === opt.token} onClick={() => choose(opt.token, opt.label)}>
             {opt.label}
           </OptionButton>
         ))}
-      </div>
+      </OptionGroup>
     </WizardShell>
   );
 }

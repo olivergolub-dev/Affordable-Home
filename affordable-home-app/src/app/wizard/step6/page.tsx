@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
-import { WizardShell, StepTitle, StepSubtitle, OptionButton, ContinueButton } from '@/components/wizard/WizardShell';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup, ContinueButton } from '@/components/wizard/WizardShell';
 import { readAnswers, setPriorityGroups } from '@/lib/wizardStore';
 import type { PriorityGroup } from '@/lib/types';
 
@@ -35,16 +35,16 @@ export default function WizardStep6() {
     <WizardShell step={6} backHref="/wizard/step5">
       <StepTitle>Do any of these apply to you?</StepTitle>
       <StepSubtitle>Select all that apply. Some programs prioritize specific groups.</StepSubtitle>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+      <OptionGroup role="group" label="Priority circumstances" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
         {options.map((opt) => (
-          <OptionButton key={opt.value} selected={selected.includes(opt.value)} onClick={() => toggle(opt.value)}>
+          <OptionButton key={opt.value} role="checkbox" selected={selected.includes(opt.value)} onClick={() => toggle(opt.value)}>
             {opt.label}
           </OptionButton>
         ))}
-        <OptionButton selected={selected.length === 0} onClick={() => setSelected([])}>
+        <OptionButton role="checkbox" selected={selected.length === 0} onClick={() => setSelected([])}>
           None of the above
         </OptionButton>
-      </div>
+      </OptionGroup>
       <ContinueButton onClick={submit}>Continue</ContinueButton>
     </WizardShell>
   );

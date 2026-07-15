@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
-import { WizardShell, StepTitle, StepSubtitle, OptionButton } from '@/components/wizard/WizardShell';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup } from '@/components/wizard/WizardShell';
 import { setHouseholdSize } from '@/lib/wizardStore';
 
 const options = [
@@ -26,13 +26,13 @@ export default function WizardStep1() {
     <WizardShell step={1}>
       <StepTitle>How many people are in your household?</StepTitle>
       <StepSubtitle>This helps us match you with the most accurate housing programs and listings.</StepSubtitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+      <OptionGroup role="radiogroup" label="Household size" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
         {options.map((opt) => (
-          <OptionButton key={opt.value} selected={false} onClick={() => choose(opt.value)}>
+          <OptionButton key={opt.value} role="radio" selected={false} onClick={() => choose(opt.value)}>
             {opt.label}
           </OptionButton>
         ))}
-      </div>
+      </OptionGroup>
     </WizardShell>
   );
 }

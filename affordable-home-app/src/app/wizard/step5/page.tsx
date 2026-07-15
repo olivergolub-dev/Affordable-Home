@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
-import { WizardShell, StepTitle, StepSubtitle, OptionButton } from '@/components/wizard/WizardShell';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup } from '@/components/wizard/WizardShell';
 import { readAnswers, setVoucher } from '@/lib/wizardStore';
 import type { VoucherStatus } from '@/lib/types';
 
@@ -30,13 +30,13 @@ export default function WizardStep5() {
     <WizardShell step={5} backHref="/wizard/step4">
       <StepTitle>Do you have a housing voucher?</StepTitle>
       <StepSubtitle>A Housing Choice Voucher (Section 8) can significantly expand your options.</StepSubtitle>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <OptionGroup role="radiogroup" label="Housing voucher status" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {options.map((opt) => (
-          <OptionButton key={opt.value} selected={selected === opt.value} onClick={() => choose(opt.value, opt.label)}>
+          <OptionButton key={opt.value} role="radio" selected={selected === opt.value} onClick={() => choose(opt.value, opt.label)}>
             {opt.label}
           </OptionButton>
         ))}
-      </div>
+      </OptionGroup>
     </WizardShell>
   );
 }

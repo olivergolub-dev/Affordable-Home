@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const TOTAL_STEPS = 7;
@@ -38,7 +39,7 @@ export function WizardShell({ step, backHref, children }: WizardShellProps) {
           <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em' }}>
             [ {stepLabel} / {String(TOTAL_STEPS).padStart(2, '0')} ]
           </span>
-          <a href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Exit</a>
+          <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Exit</Link>
         </div>
       </header>
       <div style={{ height: 2, backgroundColor: 'rgba(255,255,255,0.06)' }}>
@@ -78,19 +79,29 @@ export function StepSubtitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * A single choice within an OptionGroup. `role`/`aria-checked` come from the
+ * group (radio for single-select, checkbox for multi-select) so screen
+ * readers announce group membership ("radio button, 2 of 6") instead of the
+ * generic toggle semantics `aria-pressed` gives.
+ */
 export function OptionButton({
+  role,
   selected,
   onClick,
   children,
 }: {
+  role: 'radio' | 'checkbox';
   selected: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
     <button
+      type="button"
+      role={role}
+      aria-checked={selected}
       onClick={onClick}
-      aria-pressed={selected}
       className={selected ? 'wizard-option wizard-option-selected' : 'wizard-option'}
       style={{
         background: selected ? '#1E40AF' : 'rgba(255,255,255,0.04)',
@@ -108,6 +119,29 @@ export function OptionButton({
     >
       {children}
     </button>
+  );
+}
+
+/**
+ * Groups OptionButtons with the correct ARIA container role + label.
+ * Use role="radiogroup" for single-select steps, role="group" for
+ * multi-select (checkbox) steps.
+ */
+export function OptionGroup({
+  role,
+  label,
+  style,
+  children,
+}: {
+  role: 'radiogroup' | 'group';
+  label: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <div role={role} aria-label={label} style={style}>
+      {children}
+    </div>
   );
 }
 

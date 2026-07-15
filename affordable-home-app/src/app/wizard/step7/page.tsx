@@ -44,17 +44,22 @@ export default function WizardStep7() {
     <WizardShell step={7} backHref="/wizard/step6">
       <StepTitle>Want your results emailed to you?</StepTitle>
       <StepSubtitle>Optional. We send your results once and never store your address.</StepSubtitle>
+      <label htmlFor="email" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+        Email address
+      </label>
       <input
+        id="email"
         type="email"
+        autoComplete="email"
         placeholder="your@email.com"
         value={email}
         onChange={(e) => setEmailInput(e.target.value)}
-        aria-label="Email address"
+        aria-describedby="email-help"
         style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '20px 24px', fontSize: 18, color: '#FFFFFF', outline: 'none', boxSizing: 'border-box', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}
         onFocus={(e) => (e.currentTarget.style.borderColor = '#1E40AF')}
         onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
       />
-      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>We never sell or store your email.</p>
+      <p id="email-help" style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>We never sell or store your email.</p>
       <div style={{ marginBottom: 12 }}>
         <ContinueButton onClick={handleSubmit} disabled={sending}>
           {sending ? 'Sending...' : 'See my matches'}

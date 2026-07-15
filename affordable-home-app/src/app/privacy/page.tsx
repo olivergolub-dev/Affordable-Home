@@ -1,3 +1,11 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'How Home Reach handles your data: no accounts, no stored income data, and nothing sold or tracked at the individual level.',
+};
+
 export default function Privacy() {
   return (
     <main style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
@@ -21,7 +29,7 @@ export default function Privacy() {
           </div>
         ))}
 
-        <a href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</a>
+        <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
       </div>
     </main>
   );

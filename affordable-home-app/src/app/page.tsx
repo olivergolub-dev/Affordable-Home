@@ -1,12 +1,15 @@
 'use client'; // v2
 
-import { motion, useInView, useScroll } from 'framer-motion';
+import Link from 'next/link';
+import { motion, useInView, useReducedMotion, useScroll } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
+  const reduced = useReducedMotion();
+  if (reduced) return <div ref={ref}>{children}</div>;
   return (
         <motion.div
       ref={ref}
@@ -22,10 +25,11 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
+  const reduced = useReducedMotion();
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || reduced) return;
     let start = 0;
     const duration = 1800;
     const step = (timestamp: number) => {
@@ -37,21 +41,31 @@ function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: stri
       else setCount(target);
     };
     requestAnimationFrame(step);
-  }, [inView, target]);
+  }, [inView, target, reduced]);
 
-  return <span ref={ref}>{count}{suffix}</span>;
+  const displayed = reduced ? (inView ? target : 0) : count;
+  return <span ref={ref}>{displayed}{suffix}</span>;
 }
 
 function ParticleCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    // Respect reduced motion: mount an empty canvas, no animation loop.
+    if (reduced) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let animId: number;
+    let paused = document.hidden;
+    // Capped lower than the original 80 — the O(n²) neighbor-line pass below
+    // scales with the square of this count, and the effect is barely
+    // visible at this size while being noticeably cheaper per frame.
+    const PARTICLE_COUNT = 45;
     const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number }[] = [];
 
     const resize = () => {
@@ -61,7 +75,7 @@ function ParticleCanvas() {
     resize();
     window.addEventListener('resize', resize);
 
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
@@ -73,6 +87,10 @@ function ParticleCanvas() {
     }
 
     const draw = () => {
+      // Skip work entirely while the tab is hidden — no point redrawing
+      // (or even advancing positions) for pixels no one can see.
+      if (paused) { animId = requestAnimationFrame(draw); return; }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
         p.x += p.vx;
@@ -105,11 +123,15 @@ function ParticleCanvas() {
     };
     draw();
 
+    const onVisibility = () => { paused = document.hidden; };
+    document.addEventListener('visibilitychange', onVisibility);
+
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, []);
+  }, [reduced]);
 
   return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} />;
 }
@@ -130,15 +152,19 @@ function ScrollProgress() {
 
 function Ticker() {
   const items = ['Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · '];
+  const reduced = useReducedMotion();
   return (
-    <div style={{ backgroundColor: '#0A1628', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '10px 0' }}>
+    <div style={{ backgroundColor: '#0A1628', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: reduced ? 'auto' : 'hidden', padding: '10px 0' }}>
       <motion.div
-        animate={{ x: [0, -2000] }}
+        animate={reduced ? {} : { x: [0, -2000] }}
         transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
         style={{ display: 'flex', gap: 0, whiteSpace: 'nowrap' }}
       >
-        {[...Array(4)].map((_, i) => (
-          <span key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', paddingRight: 48 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', paddingRight: 48 }}>
+          {items[0]}
+        </span>
+        {!reduced && [...Array(3)].map((_, i) => (
+          <span key={i} aria-hidden="true" style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', paddingRight: 48 }}>
             {items[0]}
           </span>
         ))}
@@ -171,8 +197,9 @@ function GlassCard({ n, suffix, label, delay }: { n: number; suffix: string; lab
 
 function useCountUp(end: number, duration: number, startCounting: boolean): number {
   const [count, setCount] = useState(0);
+  const reduced = useReducedMotion();
   useEffect(() => {
-    if (!startCounting) return;
+    if (!startCounting || reduced) return;
     let startTime: number | null = null;
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -182,8 +209,8 @@ function useCountUp(end: number, duration: number, startCounting: boolean): numb
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
-  }, [startCounting, end, duration]);
-  return count;
+  }, [startCounting, end, duration, reduced]);
+  return reduced ? (startCounting ? end : 0) : count;
 }
 
 export default function Home() {
@@ -226,14 +253,14 @@ export default function Home() {
         }}
       >
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(16px, 4vw, 32px)', height: 64, display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a href='/' style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+          <Link href='/' style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <div>
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block', whiteSpace: 'nowrap' }}>Home Reach</span>
             </div>
-          </a>
+          </Link>
           <nav className="hide-mobile" style={{ display: 'flex', gap: 32, fontSize: 14, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto', marginRight: 32 }}>
             <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>Listings</a>
             <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>How it works</a>
@@ -305,7 +332,7 @@ export default function Home() {
             <FadeUp delay={0.1}>
               <div>
                 <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
-                  The scale of Essex County's housing crisis.
+                  The scale of Essex County&apos;s housing crisis.
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   {[
@@ -313,7 +340,7 @@ export default function Home() {
                     { stat: <>{Math.round(cRenterLo)}&ndash;{Math.round(cRenterHi)}%</>, label: 'Renter-occupied', sub: 'Unusually high for a NJ county' },
                     { stat: <>{Math.round(cHousing)}%</>, label: 'Severe housing problems', sub: 'Cost burden or overcrowding' },
                     { stat: <>{Math.round(cPoverty)}K</>, label: 'Below the poverty line', sub: '13.4% of all residents' },
-                  ].map((item, i) => (
+                  ].map((item) => (
                     <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
@@ -338,7 +365,7 @@ export default function Home() {
                     { stat: <>${Math.round(cPropVal)}K</>, label: 'Median property value', sub: 'Homeownership out of reach for most renters' },
                     { stat: <>{cHomeown.toFixed(1)}%</>, label: 'Homeownership rate', sub: 'One of the lowest in the state' },
                     { stat: <>{Math.round(cUnits)}+</>, label: 'Affordable units exist', sub: 'Most residents do not know where to find them' },
-                  ].map((item, i) => (
+                  ].map((item) => (
                     <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#60A5FA', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
@@ -382,7 +409,7 @@ export default function Home() {
       <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; WHAT YOU'LL FIND</p>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; WHAT YOU&apos;LL FIND</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>
               Trusted guidance for every affordable housing pathway.
             </h2>
@@ -550,7 +577,7 @@ export default function Home() {
                 </div>
                 <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
               </div>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', maxWidth: 280, lineHeight: 1.7 }}>Essex County's free housing guide. Connecting residents to affordable programs and income-qualified listings.</p>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', maxWidth: 280, lineHeight: 1.7 }}>Essex County&apos;s free housing guide. Connecting residents to affordable programs and income-qualified listings.</p>
             </div>
             <div style={{ display: 'flex', gap: 32 }}>
               {[{label: 'Privacy', href: '/privacy'}, {label: 'Contact', href: 'mailto:olivergolub@gmail.com'}, {label: 'Data sources', href: '/about'}].map(link => (
