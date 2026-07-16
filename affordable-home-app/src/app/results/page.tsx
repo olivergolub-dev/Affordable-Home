@@ -46,6 +46,26 @@ function formatVerified(dateStr: string | null): string | null {
   return `Verified ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
+/**
+ * Every listing gets one real, clickable action — never a dead end. Falls
+ * from the most direct (an online application) to the most general (the
+ * official source page people can read to find how to apply).
+ */
+function primaryAction(listing: MatchResult['listing']): {
+  label: string;
+  href: string;
+  event: string;
+} {
+  if (listing.application_link) {
+    return { label: 'Apply', href: listing.application_link, event: 'listing_apply_clicked' };
+  }
+  if (listing.phone) {
+    return { label: `Call ${listing.phone}`, href: `tel:${listing.phone.replace(/[^0-9+]/g, '')}`, event: 'listing_call_clicked' };
+  }
+  // Guaranteed present — every seeded listing carries a source_url.
+  return { label: 'View details', href: listing.source_url ?? '#', event: 'listing_source_clicked' };
+}
+
 export default function ResultsPage() {
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,17 +233,20 @@ export default function ResultsPage() {
                     <span style={{ backgroundColor: badge.bg, color: badge.text, border: `1px solid ${badge.border}`, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600 }}>
                       {badge.label}
                     </span>
-                    {listing.application_link ? (
-                      <a href={listing.application_link} target="_blank" rel="noopener noreferrer"
-                        onClick={() => posthog.capture('listing_apply_clicked', { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type })}
-                        style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                        Apply
-                      </a>
-                    ) : (
-                      <span style={{ backgroundColor: '#F1F5F9', color: '#64748B', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
-                        No link
-                      </span>
-                    )}
+                    {(() => {
+                      const action = primaryAction(listing);
+                      const isTel = action.href.startsWith('tel:');
+                      return (
+                        <a
+                          href={action.href}
+                          {...(isTel ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+                          onClick={() => posthog.capture(action.event, { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type })}
+                          style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+                        >
+                          {action.label}
+                        </a>
+                      );
+                    })()}
                   </div>
                 </div>
               );
