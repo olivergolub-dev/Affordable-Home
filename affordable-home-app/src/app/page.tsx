@@ -231,12 +231,22 @@ function useCountUp(end: number, duration: number, startCounting: boolean): numb
   return reduced ? (startCounting ? end : 0) : count;
 }
 
+const NAV_LINKS: { label: string; href: string }[] = [
+  { label: 'Listings', href: '/results' },
+  { label: 'How it works', href: '/#how' },
+  { label: 'Coverage', href: '/#coverage' },
+  { label: 'About', href: '/about' },
+  { label: 'Data sources', href: '/about#sources' },
+  { label: 'Privacy', href: '/privacy' },
+];
+
 export default function Home() {
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsStarted, setStatsStarted] = useState(false);
   // Real, live count so the homepage never advertises a stale number as we
   // keep adding verified listings — fetched once on mount.
   const [listingCount, setListingCount] = useState<number | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -290,16 +300,37 @@ export default function Home() {
               <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', display: 'block', whiteSpace: 'nowrap' }}>Home Reach</span>
             </div>
           </Link>
-          <nav className="hide-mobile" style={{ display: 'flex', gap: 32, fontSize: 14, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto', marginRight: 32 }}>
-            <a href="/results" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>Listings</a>
-            <a href="#how" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>How it works</a>
-            <a href="#coverage" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>Coverage</a>
-            
+          <nav className="hide-mobile" style={{ display: 'flex', gap: 22, fontSize: 13, fontWeight: 500, flexWrap: 'nowrap', marginLeft: 'auto', marginRight: 24 }}>
+            {NAV_LINKS.map((link) => (
+              <a key={link.href} href={link.href} style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 13, whiteSpace: 'nowrap' }}>{link.label}</a>
+            ))}
           </nav>
-          <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            Check Eligibility
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+            <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Check Eligibility
+            </a>
+            <button
+              className="show-mobile"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: 8, cursor: 'pointer', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                {menuOpen
+                  ? <path d="M6 6L18 18M6 18L18 6" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  : <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />}
+              </svg>
+            </button>
+          </div>
         </div>
+        {menuOpen && (
+          <nav className="show-mobile" aria-label="Site" style={{ flexDirection: 'column', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '8px clamp(16px, 4vw, 32px) 16px' }}>
+            {NAV_LINKS.map((link) => (
+              <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontSize: 15, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{link.label}</a>
+            ))}
+          </nav>
+        )}
       </motion.header>
 
       {/* HERO */}

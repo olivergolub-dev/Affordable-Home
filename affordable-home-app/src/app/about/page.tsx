@@ -38,7 +38,7 @@ export default function About() {
           <p style={{ fontSize: 13, color: '#94A3B8', marginTop: 8 }}>Sources: U.S. Census Bureau ACS 2024, HUD CHAS, Data USA</p>
         </div>
 
-        <div style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
+        <div id="sources" style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9', scrollMarginTop: 80 }}>
           <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#0A1628', marginBottom: 16 }}>Our data sources</h2>
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 20 }}>Every listing in Home Reach comes from a verified public source. We do not create or fabricate listings.</p>
           {[

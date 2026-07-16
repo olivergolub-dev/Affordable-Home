@@ -9,7 +9,6 @@ import { readAnswers } from '@/lib/wizardStore';
 import type { BedroomToken, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
 
-const availabilityOptions = ['All', 'Open', 'Waitlist'] as const;
 const bedroomFilterOptions: { label: string; token: BedroomToken | 'All' }[] = [
   { label: 'All', token: 'All' },
   { label: 'Studio', token: 'Studio' },
@@ -30,14 +29,15 @@ function formatRent(rent: number | null): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rent) + '/mo';
 }
 
-function availabilityBadge(waitlistOpen: boolean) {
-  return {
-    label: waitlistOpen ? 'Open' : 'Waitlist',
-    bg: waitlistOpen ? '#EFF6FF' : '#F0FDF4',
-    text: waitlistOpen ? '#1E40AF' : '#166534',
-    border: waitlistOpen ? '#BFDBFE' : '#BBF7D0',
-  };
-}
+// Neutral by design: real-time waitlist status isn't verified per-listing, so
+// we prompt the user to confirm with the provider rather than assert an
+// Open/Waitlist state we can't stand behind.
+const STATUS_PILL = {
+  label: 'Check status',
+  bg: '#FEFCE8',
+  text: '#854D0E',
+  border: '#FDE68A',
+};
 
 function formatVerified(dateStr: string | null): string | null {
   if (!dateStr) return null;
@@ -70,7 +70,6 @@ export default function ResultsPage() {
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [availability, setAvailability] = useState<(typeof availabilityOptions)[number]>('All');
   // answers is read once on mount and never changes for the life of this page,
   // so a lazy initializer (not an effect) is the correct way to seed both it
   // and the bedroom filter that defaults from it.
@@ -102,18 +101,14 @@ export default function ResultsPage() {
 
   const filtered = useMemo(() => {
     return matches.filter(({ listing }) => {
-      const availabilityMatch =
-        availability === 'All' ||
-        (availability === 'Open' && listing.waitlist_open) ||
-        (availability === 'Waitlist' && !listing.waitlist_open);
       const bedroomMatch =
         bedroomFilter === 'All' ||
         listing.bedroom_types.length === 0 ||
         listing.bedroom_types.includes(bedroomFilter);
       const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
-      return availabilityMatch && bedroomMatch && amiMatch;
+      return bedroomMatch && amiMatch;
     });
-  }, [matches, availability, bedroomFilter, amiFilter]);
+  }, [matches, bedroomFilter, amiFilter]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
@@ -144,16 +139,6 @@ export default function ResultsPage() {
         </div>
 
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Availability</span>
-            <select
-              value={availability}
-              onChange={(e) => { setAvailability(e.target.value as typeof availability); posthog.capture('results_filter_changed', { filter: 'Availability', value: e.target.value }); }}
-              style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
-            >
-              {availabilityOptions.map((o) => <option key={o}>{o}</option>)}
-            </select>
-          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Bedrooms</span>
             <select
@@ -204,7 +189,7 @@ export default function ResultsPage() {
         {!loading && filtered.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map(({ listing, reasons }) => {
-              const badge = availabilityBadge(listing.waitlist_open);
+              const badge = STATUS_PILL;
               const verified = formatVerified(listing.last_verified);
               return (
                 <div key={listing.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
