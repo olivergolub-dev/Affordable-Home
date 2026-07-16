@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion, useInView, useReducedMotion, useScroll } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import posthog from 'posthog-js';
+import { fetchListings } from '@/lib/listings';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -150,8 +151,10 @@ function ScrollProgress() {
   );
 }
 
-function Ticker() {
-  const items = ['Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · Essex County · Free · No Account Required · 25+ Listings · 22 Municipalities · Verified Data · Free Always · '];
+function Ticker({ listingCount }: { listingCount: number | null }) {
+  const countLabel = listingCount != null ? `${listingCount}+` : '100+';
+  const phrase = `Essex County · Free · No Account Required · ${countLabel} Listings · 22 Municipalities · Verified Data · Free Always · `;
+  const items = [phrase + phrase];
   const reduced = useReducedMotion();
   return (
     <div style={{ backgroundColor: '#0A1628', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: reduced ? 'auto' : 'hidden', padding: '10px 0' }}>
@@ -173,23 +176,38 @@ function Ticker() {
   );
 }
 
-function GlassCard({ n, suffix, label, delay }: { n: number; suffix: string; label: string; delay: number }) {
+function GlassCard({ n, suffix, label, delay, href }: { n: number; suffix: string; label: string; delay: number; href?: string }) {
+  const cardStyle: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.05)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: 4,
+    padding: '24px 32px',
+    minWidth: 160,
+    position: 'relative',
+    display: 'block',
+    textDecoration: 'none',
+  };
+  const body = (
+    <>
+      <p style={{ fontSize: 48, fontWeight: 800, color: '#FFFFFF', marginBottom: 4, lineHeight: 1, fontFamily: 'Inter, sans-serif' }}>
+        <AnimatedNumber target={n} suffix={suffix} />
+      </p>
+      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+        {label}
+        {href && <span aria-hidden="true" style={{ fontSize: 13 }}>→</span>}
+      </p>
+    </>
+  );
   return (
     <FadeUp delay={delay}>
-      <div style={{
-        background: 'rgba(255,255,255,0.05)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: 4,
-        padding: '24px 32px',
-        minWidth: 160,
-        position: 'relative',
-      }}>
-        <p style={{ fontSize: 48, fontWeight: 800, color: '#FFFFFF', marginBottom: 4, lineHeight: 1, fontFamily: 'Inter, sans-serif' }}>
-          <AnimatedNumber target={n} suffix={suffix} />
-        </p>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500 }}>{label}</p>
-      </div>
+      {href ? (
+        <Link href={href} className="glass-card-link" style={cardStyle}>
+          {body}
+        </Link>
+      ) : (
+        <div style={cardStyle}>{body}</div>
+      )}
     </FadeUp>
   );
 }
@@ -216,6 +234,9 @@ function useCountUp(end: number, duration: number, startCounting: boolean): numb
 export default function Home() {
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsStarted, setStatsStarted] = useState(false);
+  // Real, live count so the homepage never advertises a stale number as we
+  // keep adding verified listings — fetched once on mount.
+  const [listingCount, setListingCount] = useState<number | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -224,6 +245,14 @@ export default function Home() {
     );
     if (statsRef.current) observer.observe(statsRef.current);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchListings().then(({ listings }) => {
+      if (isMounted) setListingCount(listings.length);
+    });
+    return () => { isMounted = false; };
   }, []);
 
   const cResidents = useCountUp(863, 2000, statsStarted);
@@ -384,14 +413,14 @@ export default function Home() {
       </section>
 
       {/* TICKER */}
-      <Ticker />
+      <Ticker listingCount={listingCount} />
 
       {/* GLASS STATS BAR */}
       <section style={{ backgroundColor: '#0A1628', padding: 'clamp(40px, 5vw, 64px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
         {/* Noise on dark sections */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <GlassCard n={25} suffix="+" label="Verified listings" delay={0} />
+          <GlassCard n={listingCount ?? 100} suffix="+" label="Verified listings" delay={0} href="/results" />
           <GlassCard n={22} suffix="" label="Municipalities covered" delay={0.1} />
           <GlassCard n={100} suffix="%" label="Free, always" delay={0.2} />
           <GlassCard n={0} suffix="" label="Accounts required" delay={0.3} />

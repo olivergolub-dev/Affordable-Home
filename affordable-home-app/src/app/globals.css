@@ -31,6 +31,20 @@ html {
   .hide-mobile { display: none !important; }
 }
 
+.glass-card-link {
+  transition: border-color 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+}
+.glass-card-link:hover,
+.glass-card-link:focus-visible {
+  border-color: #60A5FA !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+.glass-card-link:focus-visible {
+  outline: 2px solid #93C5FD;
+  outline-offset: 2px;
+}
+
 /* Sitewide keyboard-focus visibility. Wizard buttons override this with a
    more specific .wizard-option rule below (kept for their hover-matching
    blue outline); this covers every other link/button/input/select. */
