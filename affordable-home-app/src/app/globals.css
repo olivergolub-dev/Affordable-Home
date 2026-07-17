@@ -29,9 +29,34 @@ html {
 
 .show-mobile { display: none !important; }
 
+/* Results listing card — row on desktop, stacked on mobile. */
+.result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.result-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.result-details { flex: 1; min-width: 0; }
+.result-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 640px) {
   .hide-mobile { display: none !important; }
   .show-mobile { display: flex !important; }
+  .result-card { flex-direction: column; align-items: stretch; }
+  .result-actions { justify-content: space-between; }
 }
 
 .glass-card-link {

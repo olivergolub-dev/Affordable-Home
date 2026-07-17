@@ -213,38 +213,40 @@ export default function ResultsPage() {
               const verified = formatVerified(listing.last_verified);
               const fit = scoreStyle(score);
               return (
-                <div key={listing.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                  {hasProfile && (
-                    <div
-                      title={`Fit ${score.toFixed(1)}/10 — ${fit.label}. How well this listing matches your answers.`}
-                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 58, minWidth: 58, height: 58, borderRadius: 10, backgroundColor: fit.bg, color: fit.text, border: `1px solid ${fit.border}` }}
-                    >
-                      <span style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{score.toFixed(1)}</span>
-                      <span style={{ fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3, opacity: 0.75 }}>Fit</span>
-                    </div>
-                  )}
-                  <div style={{ flex: 1, minWidth: 200 }}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
-                      <span style={{ fontSize: 13, color: '#64748B' }}>{listing.city}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155', marginBottom: reasons.length ? 8 : 0 }}>
-                      <span>{formatRent(listing.rent)}</span>
-                      {listing.ami_bands.length > 0 && <span>{listing.ami_bands.map((b) => `${b}%`).join('/')} AMI</span>}
-                      {listing.program_type && <span>{listing.program_type}</span>}
-                    </div>
-                    {reasons.length > 0 && (
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-                        {reasons.map((r) => (
-                          <span key={r} style={{ fontSize: 11, color: '#1E40AF', backgroundColor: '#EFF6FF', borderRadius: 4, padding: '2px 8px' }}>{r}</span>
-                        ))}
+                <div key={listing.id} className="result-card" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '20px 22px' }}>
+                  <div className="result-main">
+                    {hasProfile && (
+                      <div
+                        title={`Fit ${score.toFixed(1)}/10 — ${fit.label}. How well this listing matches your answers.`}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 54, minWidth: 54, height: 54, borderRadius: 10, backgroundColor: fit.bg, color: fit.text, border: `1px solid ${fit.border}`, flexShrink: 0 }}
+                      >
+                        <span style={{ fontSize: 17, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{score.toFixed(1)}</span>
+                        <span style={{ fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3, opacity: 0.75 }}>Fit</span>
                       </div>
                     )}
-                    <div style={{ fontSize: 11, color: '#94A3B8' }}>
-                      Source: {listing.source}{verified ? ` · ${verified}` : ''}
+                    <div className="result-details">
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
+                        <span style={{ fontSize: 13, color: '#64748B' }}>{listing.city}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155', marginBottom: reasons.length ? 8 : 0, flexWrap: 'wrap' }}>
+                        <span>{formatRent(listing.rent)}</span>
+                        {listing.ami_bands.length > 0 && <span>{listing.ami_bands.map((b) => `${b}%`).join('/')} AMI</span>}
+                        {listing.program_type && <span>{listing.program_type}</span>}
+                      </div>
+                      {reasons.length > 0 && (
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                          {reasons.map((r) => (
+                            <span key={r} style={{ fontSize: 11, color: '#1E40AF', backgroundColor: '#EFF6FF', borderRadius: 4, padding: '2px 8px' }}>{r}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 11, color: '#94A3B8' }}>
+                        Source: {listing.source}{verified ? ` · ${verified}` : ''}
+                      </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="result-actions">
                     <span style={{ backgroundColor: badge.bg, color: badge.text, border: `1px solid ${badge.border}`, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600 }}>
                       {badge.label}
                     </span>
