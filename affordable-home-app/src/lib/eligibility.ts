@@ -6,9 +6,11 @@ const RENT_BURDEN_RATIO = 0.3;
 /** How far above the 30% target a listing can still appear before being excluded. */
 const RENT_BURDEN_CUSHION = 1.5;
 
-/** A listing paired with an explanation of why it matched. */
+/** A listing paired with a fit score and an explanation of why it matched. */
 export interface MatchResult {
   listing: Listing;
+  /** 0–10 fit score, one decimal. Higher = better fit for this household. */
+  score: number;
   /** Short reasons this listing fits the household, for display. */
   reasons: string[];
 }
@@ -64,6 +66,64 @@ function rentIsAffordable(listing: Listing, answers: WizardAnswers): boolean {
   return listing.rent <= budget * RENT_BURDEN_CUSHION;
 }
 
+/** True if this listing's program accepts / is a housing voucher. */
+function acceptsVoucher(listing: Listing): boolean {
+  return /voucher|section 8|hcv|pbv/i.test(listing.program_type ?? '');
+}
+
+/**
+ * Fit score, 0–10 (one decimal), for a listing the household already qualifies
+ * for. It rewards how *confidently* and *closely* the listing fits: a stronger
+ * signal (a known rent within budget, a specific town match, an accepted
+ * voucher) scores higher than an unknown/thin one. Every returned listing is
+ * eligible, so this differentiates good-fit from just-eligible, it never gates.
+ */
+function scoreListing(listing: Listing, answers: WizardAnswers, eligibleBandOverlap: AmiBand[]): number {
+  let score = 1; // baseline: it cleared every hard eligibility filter
+
+  // Income eligibility — the heaviest factor.
+  if (answers.income != null && answers.householdSize != null) {
+    score += eligibleBandOverlap.length > 0 ? 3 : 0;
+  } else {
+    score += 1; // income unknown → partial confidence
+  }
+
+  // Rent vs. the household's 30%-of-income budget.
+  const budget = monthlyBudget(answers.income);
+  if (listing.rent != null && budget != null) {
+    if (listing.rent <= budget) score += 2;
+    else if (listing.rent <= budget * RENT_BURDEN_CUSHION) score += 1;
+  } else {
+    score += 0.7; // rent unknown ("contact for rent") is normal — mild credit
+  }
+
+  // Location.
+  if (!wantsAnyTown(answers.towns) && answers.towns.length > 0) {
+    score += townMatches(listing, answers.towns) ? 1.5 : 0;
+  } else {
+    score += 0.6; // no town preference → neutral
+  }
+
+  // Bedrooms.
+  if (answers.bedrooms) {
+    score += listing.bedroom_types.includes(answers.bedrooms) ? 1.2 : 0.4;
+  } else {
+    score += 0.4;
+  }
+
+  // Voucher fit.
+  if (answers.voucher === 'yes' && acceptsVoucher(listing)) score += 1;
+
+  // Priority group (senior / veteran / disability / homeless).
+  if (answers.priorityGroups.some((g) => listing.priority_groups.includes(g))) score += 1.5;
+
+  // Accessibility when the household indicated a disability.
+  if (answers.priorityGroups.includes('disability') && listing.accessible) score += 0.5;
+
+  const clamped = Math.max(0, Math.min(10, score));
+  return Math.round(clamped * 10) / 10;
+}
+
 /**
  * Core matching engine. Given the wizard answers, return the listings the
  * household is eligible for, each annotated with human-readable reasons.
@@ -102,23 +162,16 @@ export function matchListings(listings: Listing[], answers: WizardAnswers): Matc
     ) {
       reasons.push('Prioritizes your household');
     }
-    if (answers.voucher === 'yes' && /voucher|section 8|hcv|pbv/i.test(listing.program_type ?? '')) {
+    if (answers.voucher === 'yes' && acceptsVoucher(listing)) {
       reasons.push('Accepts your voucher');
     }
-    if (listing.waitlist_open) {
-      reasons.push('Waitlist open');
-    }
 
-    results.push({ listing, reasons });
+    const score = scoreListing(listing, answers, income.bands);
+    results.push({ listing, score, reasons });
   }
 
-  // Rank: open waitlists first, then those with more matched reasons.
-  results.sort((a, b) => {
-    if (a.listing.waitlist_open !== b.listing.waitlist_open) {
-      return a.listing.waitlist_open ? -1 : 1;
-    }
-    return b.reasons.length - a.reasons.length;
-  });
+  // Rank by fit score, best first. Ties fall back to more matched reasons.
+  results.sort((a, b) => b.score - a.score || b.reasons.length - a.reasons.length);
 
   return results;
 }

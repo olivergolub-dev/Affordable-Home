@@ -39,6 +39,13 @@ const STATUS_PILL = {
   border: '#FDE68A',
 };
 
+// Fit-score color tiers: strong (green), moderate (blue), lower (slate).
+function scoreStyle(score: number): { bg: string; text: string; border: string } {
+  if (score >= 8) return { bg: '#F0FDF4', text: '#166534', border: '#BBF7D0' };
+  if (score >= 6) return { bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE' };
+  return { bg: '#F8FAFC', text: '#475569', border: '#E2E8F0' };
+}
+
 function formatVerified(dateStr: string | null): string | null {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -76,6 +83,18 @@ export default function ResultsPage() {
   const [answers] = useState<WizardAnswers>(() => readAnswers());
   const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>(() => answers.bedrooms ?? 'All');
   const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
+
+  // A fit score is only meaningful when there's a household profile to score
+  // against. On a bare "browse all listings" visit (no quiz answers), every
+  // score collapses to the same baseline, so we hide the chip instead of
+  // showing a meaningless uniform number.
+  const hasProfile =
+    answers.householdSize != null ||
+    answers.income != null ||
+    answers.bedrooms != null ||
+    answers.towns.length > 0 ||
+    answers.voucher != null ||
+    answers.priorityGroups.length > 0;
 
   useEffect(() => {
     let isMounted = true;
@@ -188,11 +207,21 @@ export default function ResultsPage() {
 
         {!loading && filtered.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filtered.map(({ listing, reasons }) => {
+            {filtered.map(({ listing, score, reasons }) => {
               const badge = STATUS_PILL;
               const verified = formatVerified(listing.last_verified);
+              const fit = scoreStyle(score);
               return (
                 <div key={listing.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                  {hasProfile && (
+                    <div
+                      title="Fit score — how well this listing matches your answers (0–10)"
+                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 58, minWidth: 58, height: 58, borderRadius: 10, backgroundColor: fit.bg, color: fit.text, border: `1px solid ${fit.border}` }}
+                    >
+                      <span style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{score.toFixed(1)}</span>
+                      <span style={{ fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3, opacity: 0.75 }}>Fit</span>
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
                       <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
