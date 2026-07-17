@@ -73,9 +73,10 @@ function acceptsVoucher(listing: Listing): boolean {
  *   Town match ............... 1.0   (no preference → 0.5)
  *   Baseline ................. 0.5
  *   Accessibility ............ 0.5, or 1.0 when a disability is marked
- * Voucher is a hard filter, not a scoring factor (see matchListings).
- * Every returned listing is already eligible; this only ranks good-fit above
- * just-eligible — it never gates.
+ *   Voucher (soft nudge) ..... 0.5 when the holder's voucher is accepted
+ * Voucher is a soft signal only — it never hides a listing, so a voucher
+ * holder still sees every unit they could apply to. Every returned listing is
+ * already eligible; this only ranks good-fit above just-eligible, never gates.
  */
 function scoreListing(listing: Listing, answers: WizardAnswers, eligibleBandOverlap: AmiBand[]): number {
   let score = 0.5; // baseline
@@ -118,6 +119,10 @@ function scoreListing(listing: Listing, answers: WizardAnswers, eligibleBandOver
   if (listing.accessible) {
     score += answers.priorityGroups.includes('disability') ? 1.0 : 0.5;
   }
+
+  // Voucher — a soft nudge (never a filter): a voucher holder still sees every
+  // eligible listing; voucher-accepting ones just rank slightly higher.
+  if (answers.voucher === 'yes' && acceptsVoucher(listing)) score += 0.5;
 
   const clamped = Math.max(0, Math.min(10, score));
   return Math.round(clamped * 10) / 10;
