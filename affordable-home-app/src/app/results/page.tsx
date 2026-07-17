@@ -39,11 +39,12 @@ const STATUS_PILL = {
   border: '#FDE68A',
 };
 
-// Fit-score color tiers: strong (green), moderate (blue), lower (slate).
-function scoreStyle(score: number): { bg: string; text: string; border: string } {
-  if (score >= 8) return { bg: '#F0FDF4', text: '#166534', border: '#BBF7D0' };
-  if (score >= 6) return { bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE' };
-  return { bg: '#F8FAFC', text: '#475569', border: '#E2E8F0' };
+// Fit-score tiers. Muted (low-saturation) green/gold/clay — clearly readable
+// as green/yellow/red without being loud.
+function scoreStyle(score: number): { bg: string; text: string; border: string; label: string } {
+  if (score >= 7.5) return { bg: '#E9F0EB', text: '#3D6B4C', border: '#C6DBCC', label: 'Strong match' };
+  if (score >= 4.5) return { bg: '#F4EEDC', text: '#87671F', border: '#E3D5AF', label: 'Partial match' };
+  return { bg: '#F3E7E4', text: '#98493F', border: '#E1C8C2', label: 'Low match' };
 }
 
 function formatVerified(dateStr: string | null): string | null {
@@ -215,7 +216,7 @@ export default function ResultsPage() {
                 <div key={listing.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                   {hasProfile && (
                     <div
-                      title="Fit score — how well this listing matches your answers (0–10)"
+                      title={`Fit ${score.toFixed(1)}/10 — ${fit.label}. How well this listing matches your answers.`}
                       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 58, minWidth: 58, height: 58, borderRadius: 10, backgroundColor: fit.bg, color: fit.text, border: `1px solid ${fit.border}` }}
                     >
                       <span style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{score.toFixed(1)}</span>

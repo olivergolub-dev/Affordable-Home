@@ -59,66 +59,65 @@ function monthlyBudget(annualIncome: number | null): number | null {
   return Math.round((annualIncome / 12) * RENT_BURDEN_RATIO);
 }
 
-/** Rent is affordable unless it's clearly out of reach. Unknown data never excludes. */
-function rentIsAffordable(listing: Listing, answers: WizardAnswers): boolean {
-  const budget = monthlyBudget(answers.income);
-  if (listing.rent == null || budget == null) return true;
-  return listing.rent <= budget * RENT_BURDEN_CUSHION;
-}
-
 /** True if this listing's program accepts / is a housing voucher. */
 function acceptsVoucher(listing: Listing): boolean {
   return /voucher|section 8|hcv|pbv/i.test(listing.program_type ?? '');
 }
 
 /**
- * Fit score, 0–10 (one decimal), for a listing the household already qualifies
- * for. It rewards how *confidently* and *closely* the listing fits: a stronger
- * signal (a known rent within budget, a specific town match, an accepted
- * voucher) scores higher than an unknown/thin one. Every returned listing is
- * eligible, so this differentiates good-fit from just-eligible, it never gates.
+ * Fit score, 0–10 (one decimal). Weights (max, clamped to 10.0):
+ *   Income eligibility ....... 3.0   (unknown income → 1.5 partial)
+ *   Rent vs. budget .......... 2.0 within / 1.0 near / -1.0 over / 0.7 unknown
+ *   Bedroom match ............ 1.5   (unknown/no-preference → 0.5)
+ *   Priority-group match ..... 1.5
+ *   Town match ............... 1.0   (no preference → 0.5)
+ *   Baseline ................. 0.5
+ *   Accessibility ............ 0.5, or 1.0 when a disability is marked
+ * Voucher is a hard filter, not a scoring factor (see matchListings).
+ * Every returned listing is already eligible; this only ranks good-fit above
+ * just-eligible — it never gates.
  */
 function scoreListing(listing: Listing, answers: WizardAnswers, eligibleBandOverlap: AmiBand[]): number {
-  let score = 1; // baseline: it cleared every hard eligibility filter
+  let score = 0.5; // baseline
 
   // Income eligibility — the heaviest factor.
   if (answers.income != null && answers.householdSize != null) {
-    score += eligibleBandOverlap.length > 0 ? 3 : 0;
+    score += eligibleBandOverlap.length > 0 ? 3.0 : 0;
   } else {
-    score += 1; // income unknown → partial confidence
+    score += 1.5; // income unknown → partial confidence
   }
 
   // Rent vs. the household's 30%-of-income budget.
   const budget = monthlyBudget(answers.income);
   if (listing.rent != null && budget != null) {
-    if (listing.rent <= budget) score += 2;
-    else if (listing.rent <= budget * RENT_BURDEN_CUSHION) score += 1;
+    if (listing.rent <= budget) score += 2.0;
+    else if (listing.rent <= budget * RENT_BURDEN_CUSHION) score += 1.0;
+    else score -= 1.0; // significantly over budget
   } else {
     score += 0.7; // rent unknown ("contact for rent") is normal — mild credit
   }
 
-  // Location.
-  if (!wantsAnyTown(answers.towns) && answers.towns.length > 0) {
-    score += townMatches(listing, answers.towns) ? 1.5 : 0;
-  } else {
-    score += 0.6; // no town preference → neutral
-  }
-
   // Bedrooms.
   if (answers.bedrooms) {
-    score += listing.bedroom_types.includes(answers.bedrooms) ? 1.2 : 0.4;
+    score += listing.bedroom_types.includes(answers.bedrooms) ? 1.5 : 0.5;
   } else {
-    score += 0.4;
+    score += 0.5; // no preference
   }
-
-  // Voucher fit.
-  if (answers.voucher === 'yes' && acceptsVoucher(listing)) score += 1;
 
   // Priority group (senior / veteran / disability / homeless).
   if (answers.priorityGroups.some((g) => listing.priority_groups.includes(g))) score += 1.5;
 
-  // Accessibility when the household indicated a disability.
-  if (answers.priorityGroups.includes('disability') && listing.accessible) score += 0.5;
+  // Location.
+  if (!wantsAnyTown(answers.towns) && answers.towns.length > 0) {
+    score += townMatches(listing, answers.towns) ? 1.0 : 0;
+  } else {
+    score += 0.5; // no town preference → half credit
+  }
+
+  // Accessibility — 0.5 in general, 1.0 when the household marked a disability.
+  if (listing.accessible) {
+    score += answers.priorityGroups.includes('disability') ? 1.0 : 0.5;
+  }
 
   const clamped = Math.max(0, Math.min(10, score));
   return Math.round(clamped * 10) / 10;
@@ -138,7 +137,9 @@ export function matchListings(listings: Listing[], answers: WizardAnswers): Matc
   for (const listing of listings) {
     if (!townMatches(listing, answers.towns)) continue;
     if (!bedroomMatches(listing, answers.bedrooms)) continue;
-    if (!rentIsAffordable(listing, answers)) continue;
+    // Rent is no longer a hard filter: significantly over-budget listings still
+    // appear but take a -1.0 scoring penalty (see scoreListing), so they sink
+    // to the bottom rather than being hidden entirely.
 
     const income = incomeMatches(listing, answers);
     if (!income.ok) continue;
