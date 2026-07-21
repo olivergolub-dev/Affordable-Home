@@ -150,7 +150,7 @@ export function ContinueButton({ onClick, disabled, children }: { onClick: () =>
     <button
       onClick={onClick}
       disabled={disabled}
-      style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: disabled ? 'wait' : 'pointer', width: '100%', opacity: disabled ? 0.7 : 1 }}
+      style={{ backgroundColor: '#1E40AF', color: 'white', border: 'none', borderRadius: 8, padding: '16px 36px', fontSize: 15, fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer', width: '100%', opacity: disabled ? 0.55 : 1 }}
     >
       {children}
     </button>

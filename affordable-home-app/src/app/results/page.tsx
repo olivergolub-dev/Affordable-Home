@@ -6,7 +6,7 @@ import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
 import { readAnswers } from '@/lib/wizardStore';
-import type { BedroomToken, WizardAnswers } from '@/lib/types';
+import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
 
 const bedroomFilterOptions: { label: string; token: BedroomToken | 'All' }[] = [
@@ -75,15 +75,13 @@ function primaryAction(listing: MatchResult['listing']): {
 }
 
 export default function ResultsPage() {
-  const [matches, setMatches] = useState<MatchResult[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // answers is read once on mount and never changes for the life of this page,
-  // so a lazy initializer (not an effect) is the correct way to seed both it
-  // and the bedroom filter that defaults from it.
+  // so a lazy initializer (not an effect) is the correct way to seed it and the
+  // view/filter state derived from it.
   const [answers] = useState<WizardAnswers>(() => readAnswers());
-  const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>(() => answers.bedrooms ?? 'All');
-  const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
 
   // A fit score is only meaningful when there's a household profile to score
   // against. On a bare "browse all listings" visit (no quiz answers), every
@@ -97,21 +95,40 @@ export default function ResultsPage() {
     answers.voucher != null ||
     answers.priorityGroups.length > 0;
 
+  // 'me' = listings matched to the eligibility answers (filtered + scored);
+  // 'all' = the full registry, unfiltered. A ?view= override (e.g. from the
+  // homepage "All listings" card) wins; otherwise default to the personalized
+  // view when a profile exists.
+  const [view, setView] = useState<'me' | 'all'>(() => {
+    if (typeof window !== 'undefined') {
+      const v = new URLSearchParams(window.location.search).get('view');
+      if (v === 'all') return 'all';
+      if (v === 'me') return 'me';
+    }
+    return hasProfile ? 'me' : 'all';
+  });
+
+  // Bedroom filter defaults to the quiz answer in the "for me" view, but to
+  // "All" in the "all listings" view so it genuinely shows everything.
+  const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>(() =>
+    view === 'all' ? 'All' : (answers.bedrooms ?? 'All'),
+  );
+  const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
+
   useEffect(() => {
     let isMounted = true;
     async function load() {
       setLoading(true);
       setError(null);
-      const { listings, error: err } = await fetchListings();
+      const { listings: data, error: err } = await fetchListings();
       if (!isMounted) return;
       if (err) {
         setError(err);
-        setMatches([]);
+        setListings([]);
         posthog.captureException(new Error(err));
       } else {
-        const results = matchListings(listings, answers);
-        setMatches(results);
-        posthog.capture('results_viewed', { listing_count: results.length });
+        setListings(data);
+        posthog.capture('results_viewed', { listing_count: data.length });
       }
       setLoading(false);
     }
@@ -119,8 +136,20 @@ export default function ResultsPage() {
     return () => { isMounted = false; };
   }, [answers]);
 
+  const forMe = useMemo(() => matchListings(listings, answers), [listings, answers]);
+  const all = useMemo<MatchResult[]>(
+    () =>
+      [...listings]
+        .sort((a, b) => a.city.localeCompare(b.city) || a.name.localeCompare(b.name))
+        .map((listing) => ({ listing, score: 0, reasons: [] })),
+    [listings],
+  );
+
+  const base = view === 'me' ? forMe : all;
+  const showFit = view === 'me' && hasProfile;
+
   const filtered = useMemo(() => {
-    return matches.filter(({ listing }) => {
+    return base.filter(({ listing }) => {
       const bedroomMatch =
         bedroomFilter === 'All' ||
         listing.bedroom_types.length === 0 ||
@@ -128,7 +157,7 @@ export default function ResultsPage() {
       const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
       return bedroomMatch && amiMatch;
     });
-  }, [matches, bedroomFilter, amiFilter]);
+  }, [base, bedroomFilter, amiFilter]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
@@ -147,15 +176,42 @@ export default function ResultsPage() {
       </header>
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)' }}>
-        <div style={{ marginBottom: 40 }}>
+        <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 8, fontWeight: 400 }}>
-            Your matches in Essex County
+            {view === 'all' ? 'All listings in Essex County' : 'Your matches in Essex County'}
           </h1>
           <p style={{ fontSize: 16, color: '#334155' }}>
-            {answers.income != null
-              ? 'Based on your answers, here are the housing options that fit your household.'
-              : 'Browsing all listings. Take the eligibility quiz for matches tailored to your household.'}
+            {view === 'all'
+              ? 'Every affordable housing listing we track across Essex County.'
+              : hasProfile
+                ? 'Based on your answers, here are the housing options that fit your household.'
+                : 'Take the eligibility quiz to see listings matched to your household.'}
           </p>
+        </div>
+
+        {/* View toggle: personalized matches vs. the full registry */}
+        <div role="tablist" aria-label="Listing view" style={{ display: 'inline-flex', gap: 4, backgroundColor: '#EEF2F7', borderRadius: 10, padding: 4, marginBottom: 28 }}>
+          {([['me', 'Listings for me'], ['all', 'All listings']] as const).map(([key, label]) => {
+            const active = view === key;
+            return (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => {
+                  setView(key);
+                  // Reset filters so each view starts clean: "All listings" shows
+                  // everything; "Listings for me" defaults to the quiz bedroom answer.
+                  setBedroomFilter(key === 'all' ? 'All' : (answers.bedrooms ?? 'All'));
+                  setAmiFilter('All');
+                  posthog.capture('results_view_changed', { view: key });
+                }}
+                style={{ border: 'none', cursor: 'pointer', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: active ? '#FFFFFF' : 'transparent', color: active ? '#0D1117' : '#64748B', boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
@@ -180,7 +236,7 @@ export default function ResultsPage() {
             </select>
           </div>
           <div style={{ marginLeft: 'auto', fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-            {loading ? 'Loading...' : `${filtered.length} matches found`}
+            {loading ? 'Loading...' : `${filtered.length} ${view === 'all' ? 'listings' : 'matches'}`}
           </div>
         </div>
 
@@ -196,7 +252,18 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {!loading && filtered.length === 0 && !error && (
+        {/* "Listings for me" with no quiz answers yet — prompt to take it. */}
+        {!loading && !error && view === 'me' && !hasProfile && (
+          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
+            <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>See listings matched to you</p>
+            <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Answer seven quick questions and we&apos;ll rank every listing by how well it fits your household.</p>
+            <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
+              Check my eligibility
+            </Link>
+          </div>
+        )}
+
+        {!loading && (view === 'all' || hasProfile) && filtered.length === 0 && !error && (
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
             <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
             <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
@@ -206,7 +273,7 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {!loading && filtered.length > 0 && (
+        {!loading && (view === 'all' || hasProfile) && filtered.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map(({ listing, score, reasons }) => {
               const badge = STATUS_PILL;
@@ -215,7 +282,7 @@ export default function ResultsPage() {
               return (
                 <div key={listing.id} className="result-card" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '20px 22px' }}>
                   <div className="result-main">
-                    {hasProfile && (
+                    {showFit && (
                       <div
                         title={`Fit ${score.toFixed(1)}/10 — ${fit.label}. How well this listing matches your answers.`}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 54, minWidth: 54, height: 54, borderRadius: 10, backgroundColor: fit.bg, color: fit.text, border: `1px solid ${fit.border}`, flexShrink: 0 }}

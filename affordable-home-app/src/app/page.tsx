@@ -365,7 +365,7 @@ export default function Home() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 1.0, ease: [0.06, 0.6, 0.12, 1.0] }}
             style={{ fontSize: 18, color: 'rgba(255,255,255,0.85)', maxWidth: 480, lineHeight: 1.7, marginBottom: 40 }}>
-            A free resource connecting Essex County residents to affordable housing programs and income-qualified listings.
+            Free help finding affordable housing and income-qualified apartments in Essex County.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.6, delay: 1.4, ease: [0.06, 0.6, 0.12, 1.0] }}
             style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -388,7 +388,7 @@ export default function Home() {
         {/* Noise on dark sections */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <GlassCard n={listingCount ?? 100} suffix="+" label="Verified listings" delay={0} href="/results" />
+          <GlassCard n={listingCount ?? 100} suffix="+" label="All listings" delay={0} href="/results?view=all" />
           <GlassCard n={22} suffix="" label="Municipalities covered" delay={0.1} />
           <GlassCard n={100} suffix="%" label="Free, always" delay={0.2} />
           <GlassCard n={0} suffix="" label="Accounts required" delay={0.3} />
@@ -402,7 +402,7 @@ export default function Home() {
           <FadeUp>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: 'rgba(255,255,255,0.4)', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; HOW IT WORKS</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 64, fontWeight: 300 }}>
-              Three steps. No guesswork.
+              Just three steps.
             </h2>
           </FadeUp>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -441,7 +441,7 @@ export default function Home() {
           <FadeUp>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 02 ] &mdash;&mdash; WHAT YOU&apos;LL FIND</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>
-              Trusted guidance for every affordable housing pathway.
+              Everything you might qualify for, in one place.
             </h2>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 40 }}>
@@ -479,7 +479,7 @@ export default function Home() {
           <FadeUp>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 03 ] &mdash;&mdash; COVERAGE</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117', fontWeight: 300 }}>All of Essex County.</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#475569', maxWidth: 560, marginBottom: 48 }}>From Newark high-rises to Caldwell garden apartments. If it is affordable housing in Essex County, we track it.</p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#475569', maxWidth: 560, marginBottom: 48 }}>Newark high-rises, Caldwell garden apartments &mdash; we track all of it.</p>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 48 }}>
             {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland', 'West Caldwell'].map((town, i) => (
@@ -517,7 +517,7 @@ export default function Home() {
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', color: '#64748B', marginBottom: 16, fontFamily: 'monospace' }}>[ 04 ] &mdash;&mdash; WHY HOME REACH</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built different on purpose.</h2>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built to be different.</h2>
           </FadeUp>
           {/* Staggered grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
@@ -568,7 +568,7 @@ export default function Home() {
             <FadeUp delay={0.1}>
               <div>
                 <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
-                  The scale of Essex County&apos;s housing crisis.
+                  The numbers behind the crisis.
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   {[

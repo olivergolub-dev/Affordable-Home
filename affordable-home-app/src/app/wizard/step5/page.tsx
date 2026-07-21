@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
-import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup } from '@/components/wizard/WizardShell';
+import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup, ContinueButton } from '@/components/wizard/WizardShell';
 import { readAnswers, setVoucher } from '@/lib/wizardStore';
 import type { VoucherStatus } from '@/lib/types';
 
@@ -14,15 +14,16 @@ const options: { label: string; value: VoucherStatus }[] = [
 
 export default function WizardStep5() {
   const router = useRouter();
-  const [selected] = useState<VoucherStatus | null>(() => readAnswers().voucher);
+  const [selected, setSelected] = useState<VoucherStatus | null>(() => readAnswers().voucher);
 
   useEffect(() => {
     if (readAnswers().householdSize == null) router.replace('/wizard');
   }, [router]);
 
-  const choose = (value: VoucherStatus, label: string) => {
-    setVoucher(value);
-    posthog.capture('wizard_voucher_selected', { voucher_status: label, step: 5 });
+  const submit = () => {
+    if (selected == null) return;
+    setVoucher(selected);
+    posthog.capture('wizard_voucher_selected', { voucher_status: selected, step: 5 });
     router.push('/wizard/step6');
   };
 
@@ -33,7 +34,7 @@ export default function WizardStep5() {
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <OptionGroup role="radiogroup" label="Housing voucher status" style={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {options.map((opt) => (
-            <OptionButton key={opt.value} role="radio" selected={selected === opt.value} onClick={() => choose(opt.value, opt.label)}>
+            <OptionButton key={opt.value} role="radio" selected={selected === opt.value} onClick={() => setSelected(opt.value)}>
               {opt.label}
             </OptionButton>
           ))}
@@ -63,6 +64,9 @@ export default function WizardStep5() {
             Don&apos;t have one? That&apos;s fine — many listings here don&apos;t require a voucher. You can also apply for one through your local housing authority.
           </p>
         </aside>
+      </div>
+      <div style={{ marginTop: 32 }}>
+        <ContinueButton onClick={submit} disabled={selected == null}>Continue</ContinueButton>
       </div>
     </WizardShell>
   );
