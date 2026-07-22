@@ -395,32 +395,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section id="how" style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
+      {/* HOW IT WORKS — white section */}
+      <section id="how" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#FFFFFF', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; HOW IT WORKS</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#FFFFFF', marginBottom: 64, fontWeight: 300 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#475569', marginBottom: 16, fontFamily: 'monospace' }}>[ 01 ] &mdash;&mdash; HOW IT WORKS</p>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 64, fontWeight: 300 }}>
               Just three steps.
             </h2>
           </FadeUp>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { n: '01', title: 'Tell us about your household', desc: 'Seven quick questions about size, income, and what you need. Income, location, household size, voucher status, and more.' },
-              { n: '02', title: 'We match programs you qualify for', desc: 'Your profile is compared against every program and listing in Essex County. AMI tier, voucher eligibility, and town preferences all factor in.' },
+              { n: '01', title: 'Tell us about your household', desc: 'A 2-minute survey of your income, location, household size, voucher status, and what you need.' },
+              { n: '02', title: 'We match programs you qualify for', desc: 'We check which Essex County programs and listings fit your household — right in your browser. Your answers stay on your device and are never stored or shared.' },
               { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application. No middleman, no fees, no account required.' },
             ].map((item, i) => (
               <FadeUp key={item.n} delay={i * 0.15}>
                 <motion.div
-                  whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
-                  style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 48, padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.08)', alignItems: 'start' }}
+                  whileHover={{ backgroundColor: 'rgba(13,17,23,0.02)' }}
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 48, padding: '40px 0', borderTop: '1px solid #E2E8F0', alignItems: 'start' }}
                 >
                   <div>
-                    <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#FFFFFF', marginBottom: 16, fontFamily: 'monospace' }}>[ {item.n} ]</p>
-                    <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', color: '#FFFFFF', lineHeight: 1.1, fontWeight: 300 }}>{item.title}</h3>
+                    <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#475569', marginBottom: 16, fontFamily: 'monospace' }}>[ {item.n} ]</p>
+                    <h3 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', color: '#0D1117', lineHeight: 1.1, fontWeight: 300 }}>{item.title}</h3>
                   </div>
-                  <p style={{ fontSize: 16, lineHeight: 1.85, color: '#FFFFFF', paddingTop: 40 }}>{item.desc}</p>
+                  <p style={{ fontSize: 16, lineHeight: 1.85, color: '#334155', paddingTop: 40 }}>{item.desc}</p>
                 </motion.div>
               </FadeUp>
             ))}
@@ -428,19 +427,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DIVIDER */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#FFFFFF' }}>
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1', margin: '0 16px' }} />
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-      </div>
-
-      {/* WHAT YOU'LL FIND */}
-      <section style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      {/* WHAT YOU'LL FIND — dark section */}
+      <section style={{ backgroundColor: '#0A1628', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#475569', marginBottom: 16, fontFamily: 'monospace' }}>[ 02 ] &mdash;&mdash; WHAT YOU&apos;LL FIND</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#FFFFFF', marginBottom: 16, fontFamily: 'monospace' }}>[ 02 ] &mdash;&mdash; WHAT YOU&apos;LL FIND</p>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, maxWidth: 700, marginBottom: 56, color: '#FFFFFF', fontWeight: 300 }}>
               Everything you might qualify for, in one place.
             </h2>
           </FadeUp>
@@ -454,24 +447,17 @@ export default function Home() {
                 <motion.div
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.2 }}
-                  style={{ borderTop: '2px solid #0D1117', paddingTop: 32 }}
+                  style={{ borderTop: '2px solid #FFFFFF', paddingTop: 32 }}
                 >
                   <div style={{ width: 36, height: 36, borderRadius: 6, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, color: 'white', fontSize: 14, fontWeight: 700 }}>✓</div>
-                  <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.4rem', marginBottom: 12, color: '#0D1117', fontWeight: 400 }}>{item.label}</p>
-                  <p style={{ fontSize: 15, lineHeight: 1.8, color: '#334155' }}>{item.desc}</p>
+                  <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.4rem', marginBottom: 12, color: '#FFFFFF', fontWeight: 400 }}>{item.label}</p>
+                  <p style={{ fontSize: 15, lineHeight: 1.8, color: '#FFFFFF' }}>{item.desc}</p>
                 </motion.div>
               </FadeUp>
             ))}
           </div>
         </div>
       </section>
-
-      {/* DIVIDER */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#FFFFFF' }}>
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1', margin: '0 16px' }} />
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-      </div>
 
       {/* COVERAGE */}
       <section id="coverage" style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)' }}>
@@ -497,17 +483,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DIVIDER */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 clamp(20px, 5vw, 48px)', backgroundColor: '#FFFFFF' }}>
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1', margin: '0 16px' }} />
-        <div style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
-      </div>
-
-      {/* WHY HOME REACH - gradient mesh */}
+      {/* WHY HOME REACH — dark section */}
       <section style={{
         padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)',
-        background: 'linear-gradient(135deg, #F0F4FF 0%, #F8FAFC 40%, #EEF2FF 70%, #F0F9FF 100%)',
+        backgroundColor: '#0A1628',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -516,8 +495,8 @@ export default function Home() {
 
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#475569', marginBottom: 16, fontFamily: 'monospace' }}>[ 04 ] &mdash;&mdash; WHY HOME REACH</p>
-            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#0D1117', fontWeight: 300 }}>Built to be different.</h2>
+            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#FFFFFF', marginBottom: 16, fontFamily: 'monospace' }}>[ 04 ] &mdash;&mdash; WHY HOME REACH</p>
+            <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 56, color: '#FFFFFF', fontWeight: 300 }}>Built to be different.</h2>
           </FadeUp>
           {/* Staggered grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
@@ -531,22 +510,22 @@ export default function Home() {
             ].map((item, i) => (
               <FadeUp key={item.title} delay={i * 0.07}>
                 <motion.div
-                  whileHover={{ y: -4, boxShadow: '0 16px 48px rgba(30,64,175,0.1)', borderColor: '#BFDBFE' }}
+                  whileHover={{ y: -4, boxShadow: '0 16px 48px rgba(0,0,0,0.25)', borderColor: '#60A5FA' }}
                   transition={{ duration: 0.2 }}
                   style={{
-                    background: 'rgba(255,255,255,0.7)',
+                    background: 'rgba(255,255,255,0.05)',
                     backdropFilter: 'blur(12px)',
                     borderRadius: 12,
                     padding: '28px 24px',
-                    border: '1px solid rgba(255,255,255,0.9)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     cursor: 'default',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     <span style={{ width: 22, height: 22, borderRadius: 4, backgroundColor: '#1E40AF', color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
                     <div>
-                      <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0D1117' }}>{item.title}</p>
-                      <p style={{ fontSize: 14, lineHeight: 1.7, color: '#334155' }}>{item.text}</p>
+                      <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#FFFFFF' }}>{item.title}</p>
+                      <p style={{ fontSize: 14, lineHeight: 1.7, color: '#FFFFFF' }}>{item.text}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -556,18 +535,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ESSEX COUNTY CONTEXT */}
-      <section ref={statsRef} style={{ backgroundColor: '#0D1F38', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -120, right: -120, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,64,175,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      {/* ESSEX COUNTY CONTEXT — white section */}
+      <section ref={statsRef} style={{ backgroundColor: '#FFFFFF', padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 48px)', borderBottom: '1px solid #E2E8F0', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -120, right: -120, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,64,175,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative' }}>
           <FadeUp>
-            <p style={{ fontSize: 12, fontFamily: 'monospace', color: '#FFFFFF', letterSpacing: '0.16em', marginBottom: 40 }}>[ 05 ] &mdash;&mdash; WHY ESSEX COUNTY</p>
+            <p style={{ fontSize: 12, fontFamily: 'monospace', color: '#475569', letterSpacing: '0.16em', marginBottom: 40 }}>[ 05 ] &mdash;&mdash; WHY ESSEX COUNTY</p>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 48 }}>
             {/* Left - scale of problem */}
             <FadeUp delay={0.1}>
               <div>
-                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
+                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#0D1117', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
                   The numbers behind the crisis.
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -577,11 +556,11 @@ export default function Home() {
                     { stat: <>{Math.round(cHousing)}%</>, label: 'Severe housing problems', sub: 'Cost burden or overcrowding' },
                     { stat: <>{Math.round(cPoverty)}K</>, label: 'Below the poverty line', sub: '13.4% of all residents' },
                   ].map((item) => (
-                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
+                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid #E2E8F0' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#0D1117', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
-                        <p style={{ fontSize: 15, fontWeight: 600, color: '#FFFFFF', marginBottom: 4 }}>{item.label}</p>
-                        <p style={{ fontSize: 14, color: '#FFFFFF', lineHeight: 1.5 }}>{item.sub}</p>
+                        <p style={{ fontSize: 15, fontWeight: 600, color: '#0D1117', marginBottom: 4 }}>{item.label}</p>
+                        <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.5 }}>{item.sub}</p>
                       </div>
                     </div>
                   ))}
@@ -592,7 +571,7 @@ export default function Home() {
             {/* Right - the gap */}
             <FadeUp delay={0.2}>
               <div>
-                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#FFFFFF', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
+                <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: '#0D1117', fontWeight: 300, lineHeight: 1.1, marginBottom: 40 }}>
                   The gap between income and housing costs.
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -602,11 +581,11 @@ export default function Home() {
                     { stat: <>{cHomeown.toFixed(1)}%</>, label: 'Homeownership rate', sub: 'One of the lowest in the state' },
                     { stat: <>{Math.round(cUnits)}+</>, label: 'Affordable units exist', sub: 'Most residents do not know where to find them' },
                   ].map((item) => (
-                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#60A5FA', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
+                    <div key={item.label} style={{ display: 'flex', gap: 24, alignItems: 'flex-start', paddingTop: 28, borderTop: '1px solid #E2E8F0' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', color: '#1E40AF', fontWeight: 300, lineHeight: 1, minWidth: 90 }}>{item.stat}</span>
                       <div>
-                        <p style={{ fontSize: 15, fontWeight: 600, color: '#FFFFFF', marginBottom: 4 }}>{item.label}</p>
-                        <p style={{ fontSize: 14, color: '#FFFFFF', lineHeight: 1.5 }}>{item.sub}</p>
+                        <p style={{ fontSize: 15, fontWeight: 600, color: '#0D1117', marginBottom: 4 }}>{item.label}</p>
+                        <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.5 }}>{item.sub}</p>
                       </div>
                     </div>
                   ))}
