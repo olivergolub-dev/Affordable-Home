@@ -407,7 +407,7 @@ export default function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
               { n: '01', title: 'Tell us about your household', desc: 'A 2-minute survey of your income, location, household size, voucher status, and what you need.' },
-              { n: '02', title: 'We match programs you qualify for', desc: 'We check which Essex County programs and listings fit your household — right in your browser. Your answers stay on your device and are never stored or shared.' },
+              { n: '02', title: 'We match programs you qualify for', desc: 'We check which Essex County programs and listings fit your household, right in your browser. Your answers stay on your device and are never stored or shared.' },
               { n: '03', title: 'Apply through official links', desc: 'Every result links straight to the official application. No middleman, no fees, no account required.' },
             ].map((item, i) => (
               <FadeUp key={item.n} delay={i * 0.15}>
