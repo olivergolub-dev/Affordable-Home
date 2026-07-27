@@ -41,9 +41,14 @@ const STATUS_PILL = {
 
 // Fit-score tiers. Muted (low-saturation) green/gold/clay — clearly readable
 // as green/yellow/red without being loud.
+// Green is 7.0+ (not 7.5): with no listing carrying rent data, the +2.0
+// "within budget" bonus never fires, so a strong match caps around 7.2. The
+// 7.0 line keeps green meaningful (income + bedroom + town, or a voucher/
+// priority match) while making it actually reachable. Raise back toward 7.5
+// once rent figures are populated.
 function scoreStyle(score: number): { bg: string; text: string; border: string; label: string } {
-  if (score >= 7.5) return { bg: '#E9F0EB', text: '#3D6B4C', border: '#C6DBCC', label: 'Strong match' };
-  if (score >= 4.5) return { bg: '#F4EEDC', text: '#87671F', border: '#E3D5AF', label: 'Partial match' };
+  if (score >= 7) return { bg: '#E9F0EB', text: '#3D6B4C', border: '#C6DBCC', label: 'Strong match' };
+  if (score >= 4) return { bg: '#F4EEDC', text: '#87671F', border: '#E3D5AF', label: 'Partial match' };
   return { bg: '#F3E7E4', text: '#98493F', border: '#E1C8C2', label: 'Low match' };
 }
 
