@@ -1,5 +1,23 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
+
+// Bio paragraphs kept as plain strings so apostrophes/quotes don't need JSX escaping.
+const BIO = [
+  "Hi, I'm Oliver.",
+  "I'm a senior at Riverdale Country School in the Bronx, and I live in New York City. I built Home Reach because affordable housing has been part of my life for as long as I can remember. My grandmother spent 24 years as West Orange Township's Director of Planning and Development, and growing up around her work showed me how confusing and inaccessible housing programs can be for the people who need them most.",
+  "Eligibility rules for affordable housing are often scattered across different agencies, buried in PDFs, or just hard to find. Home Reach pulls that information into one place and gives Essex County residents a simple way to check what they might qualify for. No fees, no accounts, no fine print.",
+  "I'm still in high school, and I built this site on my own over the summer because I think everyone deserves a straightforward answer to “am I eligible?” If you have feedback, run into an issue, or just want to share your experience using the site, I'd genuinely love to hear from you.",
+];
+
+// Where the 115 listings actually come from (see scripts/seed-listings.ts).
+const SOURCE_GROUPS: { group: string; items: string[] }[] = [
+  { group: 'Housing directories', items: ['LowIncomeHousing.us', 'Affordable Housing Hub', 'PublicHousing.com', 'AffordableHousingOnline.com', 'HUDHouses.us'] },
+  { group: 'Program administrators & developers', items: ['Piazza & Associates (affordable-housing lottery administrator)', 'New Community Corporation', 'Region Nine Housing Corporation', 'National Church Residences', 'United Methodist Communities', 'Conifer Realty'] },
+  { group: 'Housing authorities', items: ['Newark, East Orange, Orange, and Irvington housing authorities'] },
+  { group: 'Municipal affordable-housing offices', items: ['Township and borough housing offices across Essex County (South Orange, Livingston, Maplewood, West Caldwell, and others)'] },
+  { group: 'Income limits', items: ['NJ Housing & Mortgage Finance Agency (NJHMFA) — UHAC regional income limits'] },
+];
 
 export const metadata: Metadata = {
   title: 'About & Data Sources',
@@ -15,9 +33,39 @@ export default function About() {
         <p style={{ fontSize: 16, color: '#475569', lineHeight: 1.8, marginBottom: 48 }}>Home Reach is a free eligibility platform for Essex County, NJ residents. Enter your household profile once and see every affordable housing program, unit, and waitlist you qualify for. No more navigating dozens of government websites, PDFs, or dead links.</p>
 
         <div style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
+          <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#0A1628', marginBottom: 24 }}>Meet the founder</h2>
+          <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              {BIO.map((para, i) => (
+                <p
+                  key={i}
+                  style={{
+                    fontSize: i === 0 ? 18 : 15,
+                    fontWeight: i === 0 ? 600 : 400,
+                    color: i === 0 ? '#0A1628' : '#475569',
+                    lineHeight: 1.8,
+                    marginBottom: i === BIO.length - 1 ? 0 : 16,
+                  }}
+                >
+                  {para}
+                </p>
+              ))}
+            </div>
+            <div style={{ flexShrink: 0, width: 200, height: 240, borderRadius: 12, overflow: 'hidden', backgroundColor: '#F1F5F9' }}>
+              <Image
+                src="/oliver.jpg"
+                alt="Oliver Golub, founder of Home Reach"
+                width={200}
+                height={240}
+                style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center 22%' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
           <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#0A1628', marginBottom: 16 }}>Why we built this</h2>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>Home Reach started in West Orange, New Jersey, where my grandmother Susan spent 24 years as the township&apos;s Director of Planning and Development - shaping the public policies that created the affordable housing stock Essex County residents depend on today.</p>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>The tools to help people find that housing never kept pace with the policy. New Jersey&apos;s official search tool, the NJ Housing Resource Center, launched in 2005 and operates primarily as a landlord posting registry. What&apos;s missing is an eligibility-first experience - where a family enters their household profile and sees every program they qualify for, along with every unit and waitlist.</p>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 16 }}>The tools to help people find affordable housing never kept pace with the policy. New Jersey&apos;s official search tool, the NJ Housing Resource Center, launched in 2005 and operates primarily as a landlord posting registry. What&apos;s missing is an eligibility-first experience - where a family enters their household profile and sees every program they qualify for, along with every unit and waitlist.</p>
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>In March 2024, New Jersey enacted A4/S50, the most significant overhaul of state affordable housing policy in decades. This triggered a decade of new construction across Essex County. The state&apos;s primary search tool was built in 2005. Home Reach is the attempt to close that gap.</p>
         </div>
 
@@ -39,20 +87,16 @@ export default function About() {
 
         <div id="sources" style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9', scrollMarginTop: 80 }}>
           <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem', color: '#0A1628', marginBottom: 16 }}>Our data sources</h2>
-          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 20 }}>Every listing in Home Reach comes from a verified public source. We do not create or fabricate listings.</p>
-          {[
-            'NJ Housing Resource Center (NJHRC) at njhousing.gov',
-            'Newark Housing Authority',
-            'East Orange Housing Authority',
-            'Irvington Township Housing Authority',
-            'NJ Department of Community Affairs (DCA)',
-            'NJ Housing and Mortgage Finance Agency (NJHMFA)',
-            'Municipal affordable housing contacts across all 22 Essex County towns',
-            'HUD open data portal',
-          ].map(source => (
-            <div key={source} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
-              <span style={{ color: '#1E3A5F', marginTop: 2, flexShrink: 0 }}>-</span>
-              <p style={{ fontSize: 15, color: '#475569', margin: 0 }}>{source}</p>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8, marginBottom: 24 }}>Every listing in Home Reach comes from a verified public source, and each one shows its source and last-verified date. We do not create or fabricate listings.</p>
+          {SOURCE_GROUPS.map(({ group, items }) => (
+            <div key={group} style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#0A1628', letterSpacing: '0.02em', marginBottom: 8 }}>{group}</p>
+              {items.map((source) => (
+                <div key={source} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+                  <span style={{ color: '#1E3A5F', marginTop: 2, flexShrink: 0 }}>-</span>
+                  <p style={{ fontSize: 15, color: '#475569', margin: 0, lineHeight: 1.5 }}>{source}</p>
+                </div>
+              ))}
             </div>
           ))}
         </div>
