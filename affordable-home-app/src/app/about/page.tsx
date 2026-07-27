@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+// Obituary for Oliver's grandmother, Susan Borg (nj.com / Star-Ledger).
+const GRANDMOTHER_OBITUARY_URL =
+  'https://obits.nj.com/us/obituaries/starledger/name/susan-borg-obituary?id=9958655';
 
 // Bio paragraphs kept as plain strings so apostrophes/quotes don't need JSX escaping.
 const BIO = [
@@ -37,18 +42,31 @@ export default function About() {
           <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-start' }}>
             <div style={{ flex: 1, minWidth: 280 }}>
               {BIO.map((para, i) => (
-                <p
-                  key={i}
-                  style={{
-                    fontSize: i === 0 ? 18 : 15,
-                    fontWeight: i === 0 ? 600 : 400,
-                    color: i === 0 ? '#0A1628' : '#475569',
-                    lineHeight: 1.8,
-                    marginBottom: i === BIO.length - 1 ? 0 : 16,
-                  }}
-                >
-                  {para}
-                </p>
+                <Fragment key={i}>
+                  <p
+                    style={{
+                      fontSize: i === 0 ? 18 : 15,
+                      fontWeight: i === 0 ? 600 : 400,
+                      color: i === 0 ? '#0A1628' : '#475569',
+                      lineHeight: 1.8,
+                      marginBottom: i === BIO.length - 1 ? 0 : 16,
+                    }}
+                  >
+                    {para}
+                  </p>
+                  {i === 1 && (
+                    <p style={{ fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>
+                      <a
+                        href={GRANDMOTHER_OBITUARY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#1E3A5F', fontWeight: 500 }}
+                      >
+                        See more about my grandmother →
+                      </a>
+                    </p>
+                  )}
+                </Fragment>
               ))}
             </div>
             <div style={{ flexShrink: 0, width: 200, height: 240, borderRadius: 12, overflow: 'hidden', backgroundColor: '#F1F5F9' }}>
@@ -111,7 +129,20 @@ export default function About() {
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>Questions, corrections, or feedback? Email <a href="mailto:olivergolub@gmail.com" style={{ color: '#1E3A5F' }}>olivergolub@gmail.com</a>.</p>
         </div>
 
-        <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
+        <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #F1F5F9' }}>
+          <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.8, marginBottom: 24 }}>
+            In loving memory of my grandmother, who spent 24 years serving West Orange Township.{' '}
+            <a
+              href={GRANDMOTHER_OBITUARY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#1E3A5F', fontWeight: 500 }}
+            >
+              Read her obituary →
+            </a>
+          </p>
+          <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
+        </div>
       </div>
     </main>
   );
