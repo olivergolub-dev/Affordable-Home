@@ -236,6 +236,7 @@ const NAV_LINKS: { label: string; href: string }[] = [
   { label: 'How it works', href: '/#how' },
   { label: 'Coverage', href: '/#coverage' },
   { label: 'About', href: '/about' },
+  { label: 'Advisors', href: '/advisors' },
   { label: 'Data sources', href: '/about#sources' },
   { label: 'Privacy', href: '/privacy' },
 ];
