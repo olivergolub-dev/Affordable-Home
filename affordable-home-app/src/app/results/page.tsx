@@ -6,6 +6,7 @@ import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
 import { readAnswers } from '@/lib/wizardStore';
+import { SiteFooter } from '@/components/SiteFooter';
 import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
 
@@ -388,6 +389,7 @@ export default function ResultsPage() {
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   );
 }

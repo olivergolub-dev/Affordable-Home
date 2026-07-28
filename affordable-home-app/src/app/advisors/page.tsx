@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/SiteFooter';
 
 // One entry per advisor. Bios are kept as plain strings so apostrophes/quotes
 // don't need JSX escaping. Add future advisors to this array — the page renders
@@ -83,6 +84,7 @@ export default function Advisors() {
           <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 }

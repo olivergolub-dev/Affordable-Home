@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { SiteFooter } from '@/components/SiteFooter';
 
 // West Orange rededicating Ridgeway Park in honor of Susan O. Borg (Patch).
 const GRANDMOTHER_TRIBUTE_URL =
@@ -141,6 +142,7 @@ export default function About() {
         <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 }
