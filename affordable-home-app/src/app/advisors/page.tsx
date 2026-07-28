@@ -15,7 +15,7 @@ const ADVISORS: {
   {
     name: 'Daniel B. Schwartz',
     role: 'Global Venture Builder · International CEO · Investor',
-    photo: '/daniel-schwartz.jpg',
+    photo: '/daniel-schwartz.png',
     photoPosition: 'center 20%',
     bio: [
       'Daniel B. Schwartz is an internationally recognized venture builder, executive leader, and investor with more than four decades of experience turning innovative ideas into successful global businesses. He has held executive, board, founder, and advisory roles across North America, Asia, Europe, the Middle East, and Africa, working with everyone from early-stage startups to Fortune 1000 enterprises.',
