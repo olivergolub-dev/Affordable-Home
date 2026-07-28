@@ -465,18 +465,25 @@ export default function Home() {
           <FadeUp>
             <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', color: '#475569', marginBottom: 16, fontFamily: 'monospace' }}>[ 03 ] &mdash;&mdash; COVERAGE</p>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3.25rem)', lineHeight: 1.05, marginBottom: 16, color: '#0D1117', fontWeight: 300 }}>All of Essex County.</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#334155', maxWidth: 560, marginBottom: 48 }}>Newark high-rises, Caldwell garden apartments &mdash; we track all of it.</p>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#334155', maxWidth: 560, marginBottom: 48 }}>Newark high-rises, Caldwell garden apartments &mdash; we track all of it. Select a town to see its listings.</p>
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 48 }}>
             {['Newark', 'East Orange', 'Irvington', 'Orange', 'West Orange', 'Montclair', 'Bloomfield', 'Belleville', 'Nutley', 'Maplewood', 'South Orange', 'Livingston', 'Caldwell', 'Verona', 'Cedar Grove', 'Glen Ridge', 'Essex Fells', 'Fairfield', 'Millburn', 'North Caldwell', 'Roseland', 'West Caldwell'].map((town, i) => (
               <FadeUp key={town} delay={i * 0.02}>
-                <motion.div
-                  whileHover={{ backgroundColor: '#1E40AF', color: '#FFFFFF', borderColor: '#1E40AF' }}
-                  transition={{ duration: 0.15 }}
-                  style={{ border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 14px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#F8FAFC', textAlign: 'center', cursor: 'default' }}
+                <Link
+                  href={`/results?view=all&town=${encodeURIComponent(town)}`}
+                  onClick={() => posthog.capture('coverage_town_clicked', { town })}
+                  aria-label={`See affordable listings in ${town}`}
+                  style={{ textDecoration: 'none', display: 'block' }}
                 >
-                  {town}
-                </motion.div>
+                  <motion.div
+                    whileHover={{ backgroundColor: '#1E40AF', color: '#FFFFFF', borderColor: '#1E40AF' }}
+                    transition={{ duration: 0.15 }}
+                    style={{ border: '1px solid #E2E8F0', borderRadius: 8, padding: '12px 14px', fontSize: 13, fontWeight: 500, color: '#334155', backgroundColor: '#F8FAFC', textAlign: 'center', cursor: 'pointer' }}
+                  >
+                    {town}
+                  </motion.div>
+                </Link>
               </FadeUp>
             ))}
           </div>

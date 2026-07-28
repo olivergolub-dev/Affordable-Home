@@ -119,6 +119,15 @@ export default function ResultsPage() {
     view === 'all' ? 'All' : (answers.bedrooms ?? 'All'),
   );
   const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
+  // Town filter. Starts 'All' so the server and first client render match, then
+  // the ?town= param (e.g. the homepage coverage tiles link here as
+  // /results?view=all&town=West+Orange) is applied in an effect after mount.
+  const [townFilter, setTownFilter] = useState<string>('All');
+
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('town');
+    if (t) setTownFilter(t);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -153,6 +162,14 @@ export default function ResultsPage() {
   const base = view === 'me' ? forMe : all;
   const showFit = view === 'me' && hasProfile;
 
+  // Towns that actually have listings, plus the active filter (so a ?town= for
+  // a town with zero listings still renders as the selected option).
+  const townOptions = useMemo(() => {
+    const set = new Set(listings.map((l) => l.city).filter(Boolean));
+    if (townFilter !== 'All') set.add(townFilter);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [listings, townFilter]);
+
   const filtered = useMemo(() => {
     return base.filter(({ listing }) => {
       const bedroomMatch =
@@ -160,9 +177,10 @@ export default function ResultsPage() {
         listing.bedroom_types.length === 0 ||
         listing.bedroom_types.includes(bedroomFilter);
       const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
-      return bedroomMatch && amiMatch;
+      const townMatch = townFilter === 'All' || listing.city === townFilter;
+      return bedroomMatch && amiMatch && townMatch;
     });
-  }, [base, bedroomFilter, amiFilter]);
+  }, [base, bedroomFilter, amiFilter, townFilter]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
@@ -183,14 +201,18 @@ export default function ResultsPage() {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)' }}>
         <div style={{ marginBottom: 24 }}>
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.05, color: '#0D1117', marginBottom: 8, fontWeight: 400 }}>
-            {view === 'all' ? 'All listings in Essex County' : 'Your matches in Essex County'}
+            {townFilter !== 'All'
+              ? `Affordable listings in ${townFilter}`
+              : view === 'all' ? 'All listings in Essex County' : 'Your matches in Essex County'}
           </h1>
           <p style={{ fontSize: 16, color: '#334155' }}>
-            {view === 'all'
-              ? 'Every affordable housing listing we track across Essex County.'
-              : hasProfile
-                ? 'Based on your answers, here are the housing options that fit your household.'
-                : 'Take the eligibility quiz to see listings matched to your household.'}
+            {townFilter !== 'All'
+              ? `Every affordable housing listing we track in ${townFilter}, Essex County.`
+              : view === 'all'
+                ? 'Every affordable housing listing we track across Essex County.'
+                : hasProfile
+                  ? 'Based on your answers, here are the housing options that fit your household.'
+                  : 'Take the eligibility quiz to see listings matched to your household.'}
           </p>
         </div>
 
@@ -220,6 +242,17 @@ export default function ResultsPage() {
         </div>
 
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Town</span>
+            <select
+              value={townFilter}
+              onChange={(e) => { setTownFilter(e.target.value); posthog.capture('results_filter_changed', { filter: 'Town', value: e.target.value }); }}
+              style={{ border: '1px solid #E2E8F0', borderRadius: 7, padding: '6px 12px', fontSize: 13, color: '#0D1117', backgroundColor: '#F8FAFC', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="All">All towns</option>
+              {townOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: '#334155' }}>Bedrooms</span>
             <select
@@ -270,11 +303,23 @@ export default function ResultsPage() {
 
         {!loading && (view === 'all' || hasProfile) && filtered.length === 0 && !error && (
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 'clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px)', textAlign: 'center' }}>
-            <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
-            <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
-            <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
-              Retake the quiz
-            </Link>
+            {townFilter !== 'All' ? (
+              <>
+                <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No listings in {townFilter} yet</p>
+                <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>We don&apos;t track any affordable listings in {townFilter} right now. Browse every town, or check nearby Essex County municipalities.</p>
+                <button onClick={() => { setTownFilter('All'); setBedroomFilter('All'); setAmiFilter('All'); }} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+                  View all towns
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 18, color: '#0D1117', fontFamily: 'var(--font-dm-serif)', marginBottom: 8 }}>No matches found</p>
+                <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>Try adjusting your filters or broadening your location preferences.</p>
+                <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
+                  Retake the quiz
+                </Link>
+              </>
+            )}
           </div>
         )}
 
