@@ -6,9 +6,6 @@ import Link from 'next/link';
 // West Orange rededicating Ridgeway Park in honor of Susan O. Borg (Patch).
 const GRANDMOTHER_TRIBUTE_URL =
   'https://patch.com/new-jersey/westorange/west-orange-rededicates-ridgeway-park-honor-susan-o-borg';
-// Obituary for Oliver's grandmother, Susan Borg (nj.com / Star-Ledger).
-const GRANDMOTHER_OBITUARY_URL =
-  'https://obits.nj.com/us/obituaries/starledger/name/susan-borg-obituary?id=9958655';
 
 // Bio paragraphs kept as plain strings so apostrophes/quotes don't need JSX escaping.
 const BIO = [
@@ -136,12 +133,12 @@ export default function About() {
           <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.8, marginBottom: 24 }}>
             In loving memory of my grandmother, who spent 24 years serving West Orange Township.{' '}
             <a
-              href={GRANDMOTHER_OBITUARY_URL}
+              href={GRANDMOTHER_TRIBUTE_URL}
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#1E3A5F', fontWeight: 500 }}
             >
-              Read her obituary →
+              Read her tribute →
             </a>
           </p>
           <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
