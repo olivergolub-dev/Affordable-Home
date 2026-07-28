@@ -129,20 +129,7 @@ export default function About() {
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}>Questions, corrections, or feedback? Email <a href="mailto:olivergolub@gmail.com" style={{ color: '#1E3A5F' }}>olivergolub@gmail.com</a>.</p>
         </div>
 
-        <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #F1F5F9' }}>
-          <p style={{ fontSize: 14, color: '#94A3B8', lineHeight: 1.8, marginBottom: 24 }}>
-            In loving memory of my grandmother, who spent 24 years serving West Orange Township.{' '}
-            <a
-              href={GRANDMOTHER_TRIBUTE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#1E3A5F', fontWeight: 500 }}
-            >
-              Read her tribute →
-            </a>
-          </p>
-          <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
-        </div>
+        <Link href="/" style={{ fontSize: 14, color: '#1E3A5F', textDecoration: 'none', fontWeight: 500 }}>← Back to Home Reach</Link>
       </div>
     </main>
   );
