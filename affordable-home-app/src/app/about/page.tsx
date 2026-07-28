@@ -33,12 +33,12 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <>
-      <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #F1F5F9', padding: '0 clamp(20px, 5vw, 48px)', height: 64, display: 'flex', alignItems: 'center' }}>
+      <header style={{ backgroundColor: '#0A1628', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 clamp(20px, 5vw, 48px)', height: 64, display: 'flex', alignItems: 'center' }}>
         <Link href="/" aria-label="Home Reach — back to home" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#0A1628', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>Home Reach</span>
+          <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>Home Reach</span>
         </Link>
       </header>
       <main style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', padding: 'clamp(48px, 8vw, 80px) clamp(20px, 5vw, 48px)' }}>
