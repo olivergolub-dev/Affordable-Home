@@ -17,10 +17,15 @@ const options: { label: string; token: BedroomToken }[] = [
 
 export default function WizardStep3() {
   const router = useRouter();
-  const [selected, setSelected] = useState<BedroomToken | null>(() => readAnswers().bedrooms);
+  // Default to null (server-safe), then hydrate the saved answer after mount.
+  // Reading storage in the useState initializer left this stuck at null on a
+  // retake, disabling Continue. See src/app/wizard/page.tsx for the full note.
+  const [selected, setSelected] = useState<BedroomToken | null>(null);
 
   useEffect(() => {
-    if (readAnswers().householdSize == null) router.replace('/wizard');
+    if (readAnswers().householdSize == null) { router.replace('/wizard'); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate client-only sessionStorage after mount (the server render can't read it).
+    setSelected(readAnswers().bedrooms);
   }, [router]);
 
   const submit = () => {

@@ -50,6 +50,8 @@ html {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 @media (max-width: 640px) {

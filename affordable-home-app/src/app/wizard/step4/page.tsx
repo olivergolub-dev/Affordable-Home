@@ -9,10 +9,15 @@ const towns = ['Any Essex County municipality', 'Newark', 'East Orange', 'Irving
 
 export default function WizardStep4() {
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>(() => readAnswers().towns);
+  // Default to [] (server-safe), then hydrate the saved answer after mount.
+  // See src/app/wizard/page.tsx for why reading storage in the useState
+  // initializer drops the value on a retake.
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
-    if (readAnswers().householdSize == null) router.replace('/wizard');
+    if (readAnswers().householdSize == null) { router.replace('/wizard'); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate client-only sessionStorage after mount (the server render can't read it).
+    setSelected(readAnswers().towns);
   }, [router]);
 
   const toggle = (t: string) => setSelected((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));

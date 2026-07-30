@@ -12,7 +12,9 @@ import type { BedroomToken, PriorityGroup, VoucherStatus, WizardAnswers } from '
 
 const STORAGE_KEY = 'homereach_wizard_v1';
 
-const EMPTY: WizardAnswers = {
+/** The empty profile — every field unset. Also the server-safe default for
+ * components that hydrate saved answers from sessionStorage after mount. */
+export const EMPTY_ANSWERS: WizardAnswers = {
   householdSize: null,
   income: null,
   bedrooms: null,
@@ -21,6 +23,8 @@ const EMPTY: WizardAnswers = {
   priorityGroups: [],
   email: null,
 };
+
+const EMPTY = EMPTY_ANSWERS;
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';

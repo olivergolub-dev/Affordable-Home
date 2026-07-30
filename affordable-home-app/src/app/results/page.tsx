@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
-import { readAnswers } from '@/lib/wizardStore';
+import { EMPTY_ANSWERS, readAnswers } from '@/lib/wizardStore';
 import { SiteFooter } from '@/components/SiteFooter';
 import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
@@ -60,34 +60,68 @@ function formatVerified(dateStr: string | null): string | null {
   return `Verified ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
-/**
- * Every listing gets one real, clickable action — never a dead end. Falls
- * from the most direct (an online application) to the most general (the
- * official source page people can read to find how to apply).
- */
-function primaryAction(listing: MatchResult['listing']): {
+interface ListingAction {
   label: string;
   href: string;
   event: string;
-} {
+  /** 'primary' = filled blue CTA; 'secondary' = outlined website link. */
+  variant: 'primary' | 'secondary';
+  /** External (website) links open in a new tab; tel: links do not. */
+  external: boolean;
+}
+
+/**
+ * Every listing gets at least one real, clickable action — never a dead end —
+ * and, wherever possible, a way to SEE the listing (a website) before acting.
+ *
+ * Website-first ordering ("see it before you call"):
+ *   1. Apply        — a dedicated online application, when one exists.
+ *   2. View details — the official source page, so a phone-only listing can
+ *      still be read before the user picks up the phone. Present on nearly
+ *      every listing (all seeded rows carry a source_url).
+ *   3. Call         — the listing's phone number, shown last.
+ *
+ * When a website link is the only action, it becomes the primary CTA;
+ * otherwise "View details" stays a quieter secondary next to Apply/Call.
+ */
+function listingActions(listing: MatchResult['listing']): ListingAction[] {
+  const actions: ListingAction[] = [];
+  const hasPhone = Boolean(listing.phone);
+
   if (listing.application_link) {
-    return { label: 'Apply', href: listing.application_link, event: 'listing_apply_clicked' };
+    actions.push({ label: 'Apply', href: listing.application_link, event: 'listing_apply_clicked', variant: 'primary', external: true });
   }
-  if (listing.phone) {
-    return { label: `Call ${listing.phone}`, href: `tel:${listing.phone.replace(/[^0-9+]/g, '')}`, event: 'listing_call_clicked' };
+
+  // Offer the source page as "View details" whenever it isn't already the
+  // Apply link. It's the primary CTA only when there's no Apply and no phone.
+  if (listing.source_url && listing.source_url !== listing.application_link) {
+    const soleAction = !listing.application_link && !hasPhone;
+    actions.push({ label: 'View details', href: listing.source_url, event: 'listing_source_clicked', variant: soleAction ? 'primary' : 'secondary', external: true });
   }
-  // Guaranteed present — every seeded listing carries a source_url.
-  return { label: 'View details', href: listing.source_url ?? '#', event: 'listing_source_clicked' };
+
+  if (hasPhone) {
+    actions.push({ label: `Call ${listing.phone}`, href: `tel:${listing.phone!.replace(/[^0-9+]/g, '')}`, event: 'listing_call_clicked', variant: 'primary', external: false });
+  }
+
+  // Absolute fallback — should never fire, since every seeded listing carries
+  // a source_url, but guarantees no card is ever a dead end.
+  if (actions.length === 0) {
+    actions.push({ label: 'View details', href: listing.source_url ?? '#', event: 'listing_source_clicked', variant: 'primary', external: true });
+  }
+
+  return actions;
 }
 
 export default function ResultsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // answers is read once on mount and never changes for the life of this page,
-  // so a lazy initializer (not an effect) is the correct way to seed it and the
-  // view/filter state derived from it.
-  const [answers] = useState<WizardAnswers>(() => readAnswers());
+  // answers must default to the empty profile so the server render and the
+  // first client render agree; the saved profile is hydrated from
+  // sessionStorage in an effect after mount (see below). Reading storage in a
+  // lazy initializer instead made a hard refresh of this page fall back to the
+  // "All listings" view — the personalized "for me" matches were lost.
+  const [answers, setAnswers] = useState<WizardAnswers>(EMPTY_ANSWERS);
 
   // A fit score is only meaningful when there's a household profile to score
   // against. On a bare "browse all listings" visit (no quiz answers), every
@@ -102,32 +136,48 @@ export default function ResultsPage() {
     answers.priorityGroups.length > 0;
 
   // 'me' = listings matched to the eligibility answers (filtered + scored);
-  // 'all' = the full registry, unfiltered. A ?view= override (e.g. from the
-  // homepage "All listings" card) wins; otherwise default to the personalized
-  // view when a profile exists.
-  const [view, setView] = useState<'me' | 'all'>(() => {
-    if (typeof window !== 'undefined') {
-      const v = new URLSearchParams(window.location.search).get('view');
-      if (v === 'all') return 'all';
-      if (v === 'me') return 'me';
-    }
-    return hasProfile ? 'me' : 'all';
-  });
-
-  // Bedroom filter defaults to the quiz answer in the "for me" view, but to
-  // "All" in the "all listings" view so it genuinely shows everything.
-  const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>(() =>
-    view === 'all' ? 'All' : (answers.bedrooms ?? 'All'),
-  );
+  // 'all' = the full registry, unfiltered. These all start at their
+  // server-safe defaults so the server and first client render agree; the real
+  // values (from the saved profile and the URL) are applied on mount below.
+  const [view, setView] = useState<'me' | 'all'>('all');
+  const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>('All');
   const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
-  // Town filter. Starts 'All' so the server and first client render match, then
-  // the ?town= param (e.g. the homepage coverage tiles link here as
-  // /results?view=all&town=West+Orange) is applied in an effect after mount.
   const [townFilter, setTownFilter] = useState<string>('All');
 
+  // Hydrate from sessionStorage + URL once, after mount. This is what makes a
+  // hard refresh / bookmark of /results keep the personalized "for me" view:
+  // reading the profile during render (server-side) yields the empty profile,
+  // so the defaults must be corrected here on the client.
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('town');
+    // The setState calls below intentionally run once on mount to hydrate
+    // client-only sessionStorage + URL state that the server render can't see.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const saved = readAnswers();
+    setAnswers(saved);
+    const savedHasProfile =
+      saved.householdSize != null ||
+      saved.income != null ||
+      saved.bedrooms != null ||
+      saved.towns.length > 0 ||
+      saved.voucher != null ||
+      saved.priorityGroups.length > 0;
+
+    // A ?view= override (e.g. the homepage "All listings" card) wins; otherwise
+    // default to the personalized view when a saved profile exists.
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    const nextView: 'me' | 'all' =
+      viewParam === 'all' ? 'all' : viewParam === 'me' ? 'me' : savedHasProfile ? 'me' : 'all';
+    setView(nextView);
+    // Bedroom filter defaults to the quiz answer in the "for me" view, but to
+    // "All" in the "all listings" view so it genuinely shows everything.
+    setBedroomFilter(nextView === 'all' ? 'All' : (saved.bedrooms ?? 'All'));
+
+    // ?town= deep links (e.g. the homepage coverage tiles →
+    // /results?view=all&town=West+Orange).
+    const t = params.get('town');
     if (t) setTownFilter(t);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   useEffect(() => {
@@ -149,7 +199,10 @@ export default function ResultsPage() {
     }
     load();
     return () => { isMounted = false; };
-  }, [answers]);
+    // Listings are fetched once on mount; the fetch doesn't depend on the
+    // profile (matching happens client-side in the `forMe` memo below), so it
+    // must not re-run when `answers` hydrates from storage.
+  }, []);
 
   const forMe = useMemo(() => matchListings(listings, answers), [listings, answers]);
   const all = useMemo<MatchResult[]>(
@@ -368,20 +421,30 @@ export default function ResultsPage() {
                     <span style={{ backgroundColor: badge.bg, color: badge.text, border: `1px solid ${badge.border}`, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600 }}>
                       {badge.label}
                     </span>
-                    {(() => {
-                      const action = primaryAction(listing);
-                      const isTel = action.href.startsWith('tel:');
+                    {listingActions(listing).map((action) => {
+                      const primary = action.variant === 'primary';
                       return (
                         <a
+                          key={action.href + action.label}
                           href={action.href}
-                          {...(isTel ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+                          {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                           onClick={() => posthog.capture(action.event, { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type })}
-                          style={{ backgroundColor: '#1E40AF', color: 'white', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+                          style={{
+                            backgroundColor: primary ? '#1E40AF' : '#EFF6FF',
+                            color: primary ? '#FFFFFF' : '#1E40AF',
+                            border: primary ? '1px solid #1E40AF' : '1px solid #DBEAFE',
+                            padding: '10px 20px',
+                            borderRadius: 8,
+                            fontSize: 13,
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap',
+                          }}
                         >
                           {action.label}
                         </a>
                       );
-                    })()}
+                    })}
                   </div>
                 </div>
               );

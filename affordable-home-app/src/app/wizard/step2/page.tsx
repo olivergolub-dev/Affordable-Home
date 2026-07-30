@@ -7,13 +7,16 @@ import { parseIncome, readAnswers, setIncome } from '@/lib/wizardStore';
 
 export default function WizardStep2() {
   const router = useRouter();
-  const [income, setIncomeInput] = useState(() => {
-    const stored = readAnswers().income;
-    return stored != null ? String(stored) : '';
-  });
+  // Default to '' (server-safe), then hydrate the saved answer after mount.
+  // See src/app/wizard/page.tsx for why reading storage in the useState
+  // initializer drops the value on a retake.
+  const [income, setIncomeInput] = useState('');
 
   useEffect(() => {
-    if (readAnswers().householdSize == null) router.replace('/wizard');
+    if (readAnswers().householdSize == null) { router.replace('/wizard'); return; }
+    const stored = readAnswers().income;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate client-only sessionStorage after mount (the server render can't read it).
+    if (stored != null) setIncomeInput(String(stored));
   }, [router]);
 
   const submit = () => {

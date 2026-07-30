@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 import { WizardShell, StepTitle, StepSubtitle, OptionButton, OptionGroup, ContinueButton } from '@/components/wizard/WizardShell';
 import { readAnswers, setHouseholdSize } from '@/lib/wizardStore';
@@ -16,7 +16,17 @@ const options = [
 
 export default function WizardStep1() {
   const router = useRouter();
-  const [selected, setSelected] = useState<number | null>(() => readAnswers().householdSize);
+  // Start with the server-safe default (null) so the server and first client
+  // render agree, then hydrate the saved answer after mount. Reading
+  // sessionStorage inside the useState initializer instead left `selected`
+  // stuck at null on a retake — the option never showed as picked and the
+  // Continue button stayed disabled, so the user couldn't proceed.
+  const [selected, setSelected] = useState<number | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate client-only sessionStorage after mount (the server render can't read it).
+    setSelected(readAnswers().householdSize);
+  }, []);
 
   const submit = () => {
     if (selected == null) return;

@@ -15,10 +15,15 @@ const options: { label: string; value: PriorityGroup }[] = [
 
 export default function WizardStep6() {
   const router = useRouter();
-  const [selected, setSelected] = useState<PriorityGroup[]>(() => readAnswers().priorityGroups);
+  // Default to [] (server-safe), then hydrate the saved answer after mount.
+  // See src/app/wizard/page.tsx for why reading storage in the useState
+  // initializer drops the value on a retake.
+  const [selected, setSelected] = useState<PriorityGroup[]>([]);
 
   useEffect(() => {
-    if (readAnswers().householdSize == null) router.replace('/wizard');
+    if (readAnswers().householdSize == null) { router.replace('/wizard'); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydrate client-only sessionStorage after mount (the server render can't read it).
+    setSelected(readAnswers().priorityGroups);
   }, [router]);
 
   const toggle = (value: PriorityGroup) => {
