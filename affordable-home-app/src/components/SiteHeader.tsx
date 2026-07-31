@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import posthog from 'posthog-js';
+import { AccountNav } from '@/components/AccountNav';
 
 /**
  * Site-wide navigation. Single source of truth for the top-nav links, shared
@@ -43,7 +44,8 @@ export function SiteHeader() {
             <a key={link.href} href={link.href} style={{ color: '#FFFFFF', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>{link.label}</a>
           ))}
         </nav>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+          <span className="hide-mobile"><AccountNav /></span>
           <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             Check Eligibility
           </a>

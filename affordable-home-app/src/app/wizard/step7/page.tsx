@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
@@ -59,7 +60,30 @@ export default function WizardStep7() {
         onFocus={(e) => (e.currentTarget.style.borderColor = '#1E40AF')}
         onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
       />
-      <p id="email-help" style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 32 }}>We never sell or store your email.</p>
+      <p id="email-help" style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 28 }}>We never sell or store your email.</p>
+
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24, marginBottom: 28 }}>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: 14 }}>
+          Want to keep your results? Create a free account to save them, bookmark listings, and get alerts when new matches appear.
+        </p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Link
+            href="/login?mode=signup"
+            onClick={() => posthog.capture('account_cta_clicked', { source: 'wizard_step7', action: 'signup' })}
+            style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#FFFFFF', padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}
+          >
+            Create account
+          </Link>
+          <Link
+            href="/login"
+            onClick={() => posthog.capture('account_cta_clicked', { source: 'wizard_step7', action: 'login' })}
+            style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}
+          >
+            Log in
+          </Link>
+        </div>
+      </div>
+
       <div style={{ marginBottom: 12 }}>
         <ContinueButton onClick={handleSubmit} disabled={sending}>
           {sending ? 'Sending...' : 'See my matches'}

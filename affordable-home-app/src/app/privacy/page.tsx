@@ -19,7 +19,7 @@ export default function Privacy() {
         <p style={{ fontSize: 14, color: '#64748B', marginBottom: 48 }}>Last updated: June 2026</p>
 
         {[
-          { title: 'No account required', body: 'Home Reach does not require you to create an account. You can use the eligibility wizard and view results without registering or logging in.' },
+          { title: 'Accounts are optional', body: 'Home Reach does not require an account. You can use the eligibility wizard and view results without registering or logging in. If you choose to create a free account, we use it only to save your results and favorite listings, and to email you about new matching listings if you opt in. You can delete your account and its data at any time.' },
           { title: 'What we collect', body: 'When you use the eligibility wizard, your answers are stored temporarily in your browser session only. This data is never sent to our servers and disappears automatically when you close the tab.' },
           { title: 'No sensitive data stored', body: 'We do not store your income, household size, voucher status, or any other personal details you enter into the wizard. If you choose to provide an email address for results, it is used once to send your results and then discarded. It is never saved.' },
           { title: 'Analytics', body: 'We use basic analytics to understand how people use Home Reach; for example, how many people complete the wizard or click on a listing. This data is aggregated and anonymous. We do not track individuals.' },

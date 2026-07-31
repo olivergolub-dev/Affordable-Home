@@ -13,7 +13,7 @@ const GRANDMOTHER_TRIBUTE_URL =
 const BIO = [
   "Hi, I'm Oliver.",
   "I'm a senior at Riverdale Country School in the Bronx, and I live in New York City. I built Home Reach because affordable housing has been part of my life for as long as I can remember. My grandmother spent 24 years as West Orange Township's Director of Planning and Development, and growing up around her work showed me how confusing and inaccessible housing programs can be for the people who need them most.",
-  "Eligibility rules for affordable housing are often scattered across different agencies, buried in PDFs, or just hard to find. Home Reach pulls that information into one place and gives Essex County residents a simple way to check what they might qualify for. No fees, no accounts, no fine print.",
+  "Eligibility rules for affordable housing are often scattered across different agencies, buried in PDFs, or just hard to find. Home Reach pulls that information into one place and gives Essex County residents a simple way to check what they might qualify for. No fees and no fine print. Accounts are optional, and only used to save your results and listings if you want them.",
   "I'm still in high school, and I built this site on my own over the summer because I think everyone deserves a straightforward answer to “am I eligible?” If you have feedback, run into an issue, or just want to share your experience using the site, I'd genuinely love to hear from you.",
 ];
 
