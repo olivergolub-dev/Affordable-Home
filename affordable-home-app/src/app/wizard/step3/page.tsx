@@ -7,12 +7,14 @@ import { readAnswers, setBedrooms } from '@/lib/wizardStore';
 import type { BedroomToken } from '@/lib/types';
 
 // Friendly wizard labels mapped to canonical bedroom tokens used for matching.
-// '3BR' means "3 or more" — see bedroomMatches() in src/lib/eligibility.ts.
+// '3BR' is an exact match; '4BR' means "4 or more". See bedroomMatches() in
+// src/lib/eligibility.ts.
 const options: { label: string; token: BedroomToken }[] = [
   { label: 'Studio', token: 'Studio' },
   { label: '1 bedroom', token: '1BR' },
   { label: '2 bedrooms', token: '2BR' },
-  { label: '3+ bedrooms', token: '3BR' },
+  { label: '3 bedrooms', token: '3BR' },
+  { label: '4+ bedrooms', token: '4BR' },
 ];
 
 export default function WizardStep3() {

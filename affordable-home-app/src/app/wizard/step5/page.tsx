@@ -63,10 +63,10 @@ export default function WizardStep5() {
             A <strong style={{ color: '#FFFFFF', fontWeight: 600 }}>Housing Choice Voucher</strong> (often called <strong style={{ color: '#FFFFFF', fontWeight: 600 }}>Section&nbsp;8</strong>) is a government subsidy that pays part of your rent directly to a landlord. You generally pay about 30% of your income, and the voucher covers the rest.
           </p>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: 12 }}>
-            It moves with you — you can use it at any apartment where the landlord accepts vouchers, not just one building.
+            It moves with you. You can use it at any apartment where the landlord accepts vouchers, not just one building.
           </p>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
-            Don&apos;t have one? That&apos;s fine — many listings here don&apos;t require a voucher. You can also apply for one through your local housing authority.
+            Don&apos;t have one? That&apos;s fine. Many listings here don&apos;t require a voucher. You can also apply for one through your local housing authority.
           </p>
         </aside>
       </div>

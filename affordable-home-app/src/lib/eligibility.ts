@@ -44,10 +44,10 @@ function incomeMatches(listing: Listing, answers: WizardAnswers): { ok: boolean;
 function bedroomMatches(listing: Listing, bedrooms: BedroomToken | null): boolean {
   if (!bedrooms) return true;
   if (listing.bedroom_types.length === 0) return true;
-  // '3BR' means "3 or more" (matches the wizard's "3+ bedrooms" option), so a
-  // 4BR listing still satisfies it. Studio/1BR/2BR require an exact match.
+  // '4BR' is the top bucket and means "4 or more" (matches the wizard's
+  // "4+ bedrooms" option). Studio/1BR/2BR/3BR require an exact match.
   const wantedIdx = BEDROOM_TOKENS.indexOf(bedrooms);
-  if (bedrooms === '3BR') {
+  if (bedrooms === '4BR') {
     return listing.bedroom_types.some((t) => BEDROOM_TOKENS.indexOf(t) >= wantedIdx);
   }
   return listing.bedroom_types.includes(bedrooms);

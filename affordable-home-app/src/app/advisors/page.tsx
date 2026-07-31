@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
+import { SiteHeader } from '@/components/SiteHeader';
 
 // One entry per advisor. Bios are kept as plain strings so apostrophes/quotes
 // don't need JSX escaping. Add future advisors to this array — the page renders
@@ -35,14 +36,7 @@ export const metadata: Metadata = {
 export default function Advisors() {
   return (
     <>
-      <header style={{ backgroundColor: '#0A1628', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 clamp(20px, 5vw, 48px)', height: 64, display: 'flex', alignItems: 'center' }}>
-        <Link href="/" aria-label="Home Reach — back to home" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1E40AF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H15C14.4477 21 14 20.5523 14 20V15H10V20C10 20.5523 9.55228 21 9 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#FFFFFF', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>Home Reach</span>
-        </Link>
-      </header>
+      <SiteHeader />
       <main style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', padding: 'clamp(48px, 8vw, 80px) clamp(20px, 5vw, 48px)' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0A1628', marginBottom: 24, lineHeight: 1.2 }}>Advisors</h1>

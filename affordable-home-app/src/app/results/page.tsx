@@ -15,7 +15,8 @@ const bedroomFilterOptions: { label: string; token: BedroomToken | 'All' }[] = [
   { label: 'Studio', token: 'Studio' },
   { label: '1BR', token: '1BR' },
   { label: '2BR', token: '2BR' },
-  { label: '3BR+', token: '3BR' },
+  { label: '3BR', token: '3BR' },
+  { label: '4BR+', token: '4BR' },
 ];
 const amiFilterOptions: { label: string; band: AmiBand | 'All' }[] = [
   { label: 'All', band: 'All' },

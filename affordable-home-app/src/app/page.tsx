@@ -6,6 +6,7 @@ import { useRef, useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { SiteFooter } from '@/components/SiteFooter';
+import { NAV_LINKS } from '@/components/SiteHeader';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -231,16 +232,6 @@ function useCountUp(end: number, duration: number, startCounting: boolean): numb
   }, [startCounting, end, duration, reduced]);
   return reduced ? (startCounting ? end : 0) : count;
 }
-
-const NAV_LINKS: { label: string; href: string }[] = [
-  { label: 'Listings', href: '/results' },
-  { label: 'How it works', href: '/#how' },
-  { label: 'Coverage', href: '/#coverage' },
-  { label: 'About', href: '/about' },
-  { label: 'Advisors', href: '/advisors' },
-  { label: 'Data sources', href: '/about#sources' },
-  { label: 'Privacy', href: '/privacy' },
-];
 
 export default function Home() {
   const statsRef = useRef<HTMLDivElement>(null);
