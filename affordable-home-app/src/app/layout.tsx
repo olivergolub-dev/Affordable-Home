@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import { ReturnSurvey } from "@/components/ReturnSurvey";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,6 +61,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-inter" style={{ backgroundColor: '#F7F5F0' }}>
         {children}
+        <ReturnSurvey />
       </body>
     </html>
   );

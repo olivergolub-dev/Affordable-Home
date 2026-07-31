@@ -6,6 +6,7 @@ import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
 import { EMPTY_ANSWERS, readAnswers } from '@/lib/wizardStore';
+import { markListingOpened } from '@/components/ReturnSurvey';
 import { SiteFooter } from '@/components/SiteFooter';
 import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
@@ -415,7 +416,12 @@ export default function ResultsPage() {
                           key={action.href + action.label}
                           href={action.href}
                           {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                          onClick={() => posthog.capture(action.event, { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type })}
+                          onClick={() => {
+                            // Opening a listing in a new tab arms the "did we help?"
+                            // survey shown when the user refocuses this tab.
+                            if (action.external) markListingOpened();
+                            posthog.capture(action.event, { listing_name: listing.name, listing_city: listing.city, program_type: listing.program_type });
+                          }}
                           style={{
                             backgroundColor: primary ? '#1E40AF' : '#EFF6FF',
                             color: primary ? '#FFFFFF' : '#1E40AF',
