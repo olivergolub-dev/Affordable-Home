@@ -30,16 +30,6 @@ function formatRent(rent: number | null): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(rent) + '/mo';
 }
 
-// Neutral by design: real-time waitlist status isn't verified per-listing, so
-// we prompt the user to confirm with the provider rather than assert an
-// Open/Waitlist state we can't stand behind.
-const STATUS_PILL = {
-  label: 'Check status',
-  bg: '#FEFCE8',
-  text: '#854D0E',
-  border: '#FDE68A',
-};
-
 // Fit-score tiers. Muted (low-saturation) green/gold/clay — clearly readable
 // as green/yellow/red without being loud.
 // Green is 7.0+ (not 7.5): with no listing carrying rent data, the +2.0
@@ -380,7 +370,6 @@ export default function ResultsPage() {
         {!loading && (view === 'all' || hasProfile) && filtered.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map(({ listing, score, reasons }) => {
-              const badge = STATUS_PILL;
               const verified = formatVerified(listing.last_verified);
               const fit = scoreStyle(score);
               return (
@@ -418,9 +407,6 @@ export default function ResultsPage() {
                     </div>
                   </div>
                   <div className="result-actions">
-                    <span style={{ backgroundColor: badge.bg, color: badge.text, border: `1px solid ${badge.border}`, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600 }}>
-                      {badge.label}
-                    </span>
                     {listingActions(listing).map((action) => {
                       const primary = action.variant === 'primary';
                       return (
