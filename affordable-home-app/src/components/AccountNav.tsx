@@ -48,10 +48,10 @@ export function AccountNav() {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <span title={email} style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {email.split('@')[0]}
-      </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <Link href="/saved" title={email} style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, textDecoration: 'none', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        Saved
+      </Link>
       <button
         onClick={signOut}
         style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.75)', cursor: 'pointer', whiteSpace: 'nowrap' }}

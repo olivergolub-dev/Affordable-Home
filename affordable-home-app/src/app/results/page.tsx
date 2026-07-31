@@ -1,12 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
 import { EMPTY_ANSWERS, readAnswers } from '@/lib/wizardStore';
+import { addFavorite, getFavoriteListingIds, removeFavorite } from '@/lib/account';
+import { createClient } from '@/lib/supabase/client';
 import { markListingOpened } from '@/components/ReturnSurvey';
+import { FavoriteButton } from '@/components/FavoriteButton';
+import { SaveResultsButton } from '@/components/SaveResultsButton';
 import { SiteFooter } from '@/components/SiteFooter';
 import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
@@ -105,9 +110,62 @@ function listingActions(listing: MatchResult['listing']): ListingAction[] {
 }
 
 export default function ResultsPage() {
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Account state for saving/favoriting listings. Signed-out users still see
+  // the heart; clicking it sends them to log in.
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favBusy, setFavBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!active) return;
+      setLoggedIn(!!data.user);
+      if (data.user) {
+        const ids = await getFavoriteListingIds();
+        if (active) setFavorites(new Set(ids));
+      }
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(!!session?.user);
+      if (!session?.user) {
+        setFavorites(new Set());
+      } else {
+        getFavoriteListingIds().then((ids) => setFavorites(new Set(ids)));
+      }
+    });
+    return () => { active = false; sub.subscription.unsubscribe(); };
+  }, []);
+
+  async function toggleFavorite(listingId: string) {
+    if (!loggedIn) { router.push('/login'); return; }
+    if (favBusy) return;
+    const isFav = favorites.has(listingId);
+    setFavBusy(listingId);
+    // Optimistic update; revert on failure.
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (isFav) next.delete(listingId); else next.add(listingId);
+      return next;
+    });
+    const { error } = isFav ? await removeFavorite(listingId) : await addFavorite(listingId);
+    if (error) {
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (isFav) next.add(listingId); else next.delete(listingId);
+        return next;
+      });
+    } else {
+      posthog.capture(isFav ? 'listing_unfavorited' : 'listing_favorited', { listing_id: listingId });
+    }
+    setFavBusy(null);
+  }
   // answers must default to the empty profile so the server render and the
   // first client render agree; the saved profile is hydrated from
   // sessionStorage in an effect after mount (see below). Reading storage in a
@@ -319,8 +377,11 @@ export default function ResultsPage() {
               {amiFilterOptions.map((o) => <option key={o.label} value={o.band}>{o.label}</option>)}
             </select>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-            {loading ? 'Loading...' : `${filtered.length} ${view === 'all' ? 'listings' : 'matches'}`}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
+            {hasProfile && <SaveResultsButton answers={answers} loggedIn={loggedIn} />}
+            <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
+              {loading ? 'Loading...' : `${filtered.length} ${view === 'all' ? 'listings' : 'matches'}`}
+            </span>
           </div>
         </div>
 
@@ -409,6 +470,12 @@ export default function ResultsPage() {
                     </div>
                   </div>
                   <div className="result-actions">
+                    <FavoriteButton
+                      favorited={favorites.has(listing.id)}
+                      busy={favBusy === listing.id}
+                      onToggle={() => toggleFavorite(listing.id)}
+                      label={listing.name}
+                    />
                     {listingActions(listing).map((action) => {
                       const primary = action.variant === 'primary';
                       return (
