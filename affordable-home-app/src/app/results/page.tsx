@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 import { markListingOpened } from '@/components/ReturnSurvey';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { SaveResultsButton } from '@/components/SaveResultsButton';
+import { AccountNav } from '@/components/AccountNav';
 import { SiteFooter } from '@/components/SiteFooter';
 import type { BedroomToken, Listing, WizardAnswers } from '@/lib/types';
 import type { AmiBand } from '@/lib/incomeLimits';
@@ -296,9 +297,12 @@ export default function ResultsPage() {
             </div>
             <span style={{ fontWeight: 700, fontSize: 14, color: '#FFFFFF' }}>Home Reach</span>
           </Link>
-          <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-            Retake Quiz
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <AccountNav />
+            <Link href="/wizard" style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              Retake Quiz
+            </Link>
+          </div>
         </div>
       </header>
 

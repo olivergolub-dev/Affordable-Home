@@ -7,6 +7,7 @@ import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { SiteFooter } from '@/components/SiteFooter';
 import { NAV_LINKS } from '@/components/SiteHeader';
+import { AccountNav } from '@/components/AccountNav';
 
 function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef(null);
@@ -298,7 +299,8 @@ export default function Home() {
               <a key={link.href} href={link.href} style={{ color: '#FFFFFF', textDecoration: 'none', fontSize: 14, whiteSpace: 'nowrap' }}>{link.label}</a>
             ))}
           </nav>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+            <span className="hide-mobile"><AccountNav /></span>
             <a href="/wizard" onClick={() => posthog.capture('eligibility_wizard_started', { source: 'nav' })} style={{ backgroundColor: '#1E40AF', color: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
               Check Eligibility
             </a>
@@ -322,6 +324,7 @@ export default function Home() {
             {NAV_LINKS.map((link) => (
               <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{ color: '#FFFFFF', textDecoration: 'none', fontSize: 16, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{link.label}</a>
             ))}
+            <div style={{ padding: '14px 0 2px' }}><AccountNav /></div>
           </nav>
         )}
       </motion.header>
