@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 import { WizardShell, StepTitle, StepSubtitle, ContinueButton } from '@/components/wizard/WizardShell';
 import { readAnswers, setEmail } from '@/lib/wizardStore';
+import { analytics } from '@/lib/analytics';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,7 +32,7 @@ export default function WizardStep7() {
         await fetch('/api/send-results', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: trimmed, answers: readAnswers() }),
+          body: JSON.stringify({ email: trimmed, answers: readAnswers(), distinctId: analytics.getDistinctId() }),
         });
       } catch (e) {
         console.error('Email send failed', e);

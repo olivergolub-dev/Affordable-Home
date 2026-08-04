@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import posthog from 'posthog-js';
 import { fetchListings } from '@/lib/listings';
 import { matchListings, type MatchResult } from '@/lib/eligibility';
+import { percentOfMedian } from '@/lib/incomeLimits';
+import { analytics } from '@/lib/analytics';
 import { EMPTY_ANSWERS, readAnswers } from '@/lib/wizardStore';
 import { addFavorite, getFavoriteListingIds, removeFavorite } from '@/lib/account';
 import { createClient } from '@/lib/supabase/client';
@@ -267,6 +269,26 @@ export default function ResultsPage() {
   const base = view === 'me' ? forMe : all;
   const showFit = view === 'me' && hasProfile;
 
+  // Fire eligibility_calculated once, after the profile hydrates and listings
+  // load, so we can measure who ends up with zero matches. All values bucketed.
+  const firedEligibility = useRef(false);
+  useEffect(() => {
+    if (loading || !hasProfile || firedEligibility.current) return;
+    firedEligibility.current = true;
+    const amiPct =
+      answers.income != null && answers.householdSize != null
+        ? percentOfMedian(answers.income, answers.householdSize)
+        : null;
+    analytics.eligibilityCalculated({
+      amiPct,
+      householdSize: answers.householdSize,
+      matchCount: forMe.length,
+      topScore: forMe[0]?.score ?? null,
+      hasVoucher: answers.voucher === 'yes',
+      municipality: answers.towns.length > 0 ? answers.towns[0] : 'any',
+    });
+  }, [loading, hasProfile, answers, forMe]);
+
   // Towns that actually have listings, plus the active filter (so a ?town= for
   // a town with zero listings still renders as the selected option).
   const townOptions = useMemo(() => {
@@ -462,7 +484,9 @@ export default function ResultsPage() {
                         {listing.program_type && <span>{listing.program_type}</span>}
                       </div>
                       {reasons.length > 0 && (
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                        // Masked in session replay: reasons include the AMI %
+                        // derived from the user's income.
+                        <div data-ph-mask style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
                           {reasons.map((r) => (
                             <span key={r} style={{ fontSize: 11, color: '#1E40AF', backgroundColor: '#EFF6FF', borderRadius: 4, padding: '2px 8px' }}>{r}</span>
                           ))}

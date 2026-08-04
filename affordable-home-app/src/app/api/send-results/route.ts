@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 import { fetchListings } from '@/lib/listings';
 import { matchListings } from '@/lib/eligibility';
+import { PostHogClient } from '@/lib/posthog-server';
+import { matchBucket } from '@/lib/buckets';
 import type { Listing, WizardAnswers } from '@/lib/types';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY ?? '');
@@ -63,6 +65,10 @@ function listingCardHtml(l: Listing): string {
 }
 
 export async function POST(req: NextRequest) {
+  const posthog = PostHogClient();
+  // Stitched to the browser session when the client passes its distinct id;
+  // falls back to an anonymous server id otherwise.
+  let distinctId = 'server_anon';
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     if (isRateLimited(ip)) {
@@ -70,6 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    if (typeof body?.distinctId === 'string' && body.distinctId) distinctId = body.distinctId;
     const email = typeof body?.email === 'string' ? body.email.trim() : '';
     const answers = (body?.answers ?? {}) as Partial<WizardAnswers>;
 
@@ -128,9 +135,24 @@ export async function POST(req: NextRequest) {
       html,
     });
 
+    // Server-side confirmation that SendGrid actually accepted the send — a
+    // client "requested" event can't tell you this. Only the bucket is sent.
+    posthog.capture({
+      distinctId,
+      event: 'email_results_sent',
+      properties: { match_bucket: matchBucket(matches.length) },
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(err);
+    posthog.capture({
+      distinctId,
+      event: 'email_results_failed',
+      properties: { error_type: err instanceof Error ? err.name : 'unknown' },
+    });
     return NextResponse.json({ error: 'Something went wrong sending your results' }, { status: 500 });
+  } finally {
+    await posthog.shutdown();
   }
 }
