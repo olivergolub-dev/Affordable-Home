@@ -25,6 +25,16 @@ const ADVISORS: {
       'Daniel holds a B.S.E. in Systems Science and Engineering from the University of Pennsylvania and an MBA from Loyola University Maryland. He is an Alumni Ambassador for the University of Pennsylvania and a mentor with Crimson Education, where he works with students and emerging entrepreneurs on leadership and entrepreneurial thinking.',
     ],
   },
+  {
+    name: 'Herdy',
+    role: 'Senior Consultant · Simulation Development Lead · Mentor',
+    photo: '/herdy.png',
+    photoPosition: 'center 25%',
+    bio: [
+      'Herdy is a Senior Consultant and Simulation Development Lead who builds simulation-driven decision systems for complex financial and business environments. He has led the development of 12+ production platforms, contributing to over $1M in client revenue impact, and specializes in turning complex financial and Excel-based models into scalable full-stack platforms using MERN and TypeScript.',
+      'He holds an MSc in Analytics from Georgia Tech and a BSc (Hons) in Computing and Information Systems from Goldsmiths, University of London. As a mentor, he guides students through the full project lifecycle with an emphasis on first-principles thinking and clean system architecture. His mentees have earned offers from universities including Carnegie Mellon, Johns Hopkins, Imperial College London, and King’s College London.',
+    ],
+  },
 ];
 
 export const metadata: Metadata = {
