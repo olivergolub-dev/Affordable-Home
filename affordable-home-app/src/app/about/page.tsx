@@ -17,7 +17,7 @@ const BIO = [
   "I'm still in high school, and I built this site on my own over the summer because I think everyone deserves a straightforward answer to “am I eligible?” If you have feedback, run into an issue, or just want to share your experience using the site, I'd genuinely love to hear from you.",
 ];
 
-// Where the 115 listings actually come from (see scripts/seed-listings.ts).
+// Where the listings actually come from (see scripts/seed-listings.ts).
 const SOURCE_GROUPS: { group: string; items: string[] }[] = [
   { group: 'Housing directories', items: ['LowIncomeHousing.us', 'Affordable Housing Hub', 'PublicHousing.com', 'AffordableHousingOnline.com', 'HUDHouses.us'] },
   { group: 'Program administrators & developers', items: ['Piazza & Associates (affordable-housing lottery administrator)', 'New Community Corporation', 'Region Nine Housing Corporation', 'National Church Residences', 'United Methodist Communities', 'Conifer Realty'] },
