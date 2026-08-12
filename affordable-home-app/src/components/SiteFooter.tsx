@@ -24,7 +24,7 @@ export function SiteFooter() {
               <p style={{ fontSize: 15, color: '#FFFFFF', maxWidth: 280, lineHeight: 1.7 }}>Essex County&apos;s free housing guide. Connecting residents to affordable programs and income-qualified listings.</p>
             </div>
             <div style={{ display: 'flex', gap: 32 }}>
-              {[{ label: 'Privacy', href: '/privacy' }, { label: 'Contact', href: 'mailto:olivergolub@gmail.com' }, { label: 'Data sources', href: '/about' }].map((link) => (
+              {[{ label: 'Privacy', href: '/privacy' }, { label: 'Contact', href: 'mailto:olivergolub@homereach.site' }, { label: 'Data sources', href: '/about' }].map((link) => (
                 <a key={link.label} href={link.href} style={{ fontSize: 15, color: '#FFFFFF', textDecoration: 'none' }}>{link.label}</a>
               ))}
             </div>

@@ -25,7 +25,7 @@ export default function Privacy() {
           { title: 'Analytics', body: 'We use basic analytics to understand how people use Home Reach; for example, how many people complete the wizard or click on a listing. This data is aggregated and anonymous. We do not track individuals.' },
           { title: 'Third-party links', body: 'Home Reach links to external housing providers, housing authorities, and application portals. We are not responsible for the privacy practices of those sites. Always review their policies before submitting personal information.' },
           { title: 'Children', body: 'Home Reach is not directed at children under 13. We do not knowingly collect any information from children.' },
-          { title: 'Contact', body: 'Questions about this policy? Email olivergolub@gmail.com.' },
+          { title: 'Contact', body: 'Questions about this policy? Email olivergolub@homereach.site.' },
         ].map(({ title, body }) => (
           <div key={title} style={{ marginBottom: 40, paddingBottom: 40, borderBottom: '1px solid #F1F5F9' }}>
             <h2 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.25rem', color: '#0A1628', marginBottom: 12 }}>{title}</h2>
