@@ -6,7 +6,13 @@ import posthog from 'posthog-js';
 // Listing links open in a NEW tab, so "coming back to Home Reach" is the user
 // refocusing this tab after having opened a listing. We record when a listing
 // was opened, and the next time the tab becomes visible we ask — once per
-// session — whether Home Reach actually helped.
+// session — whether the RESULTS MATCHED their situation.
+//
+// Deliberately not an outcome question: housing placement takes months, so
+// "did you find a home?" is unanswerable at this moment and would collect
+// optimism rather than results. Relevance is what someone can judge right
+// after opening a listing. The outcome question lives in the 60–90 day
+// follow-up survey at /survey instead.
 const OPENED_KEY = 'hr_listing_opened';
 const DONE_KEY = 'hr_return_survey_done';
 // Ignore near-instant returns (accidental clicks): only ask if they were away
@@ -55,29 +61,29 @@ export function ReturnSurvey() {
     setOpen(false);
   }
 
-  function answer(outcome: 'yes' | 'not_yet' | 'no') {
-    posthog.capture('home_search_outcome', { outcome });
+  function answer(match: 'yes' | 'partly' | 'no') {
+    posthog.capture('results_match_feedback', { match });
     close();
   }
 
   function dismiss() {
-    posthog.capture('home_search_outcome', { outcome: 'dismissed' });
+    posthog.capture('results_match_feedback', { match: 'dismissed' });
     close();
   }
 
   if (!open) return null;
 
-  const choices: { label: string; outcome: 'yes' | 'not_yet' | 'no'; primary?: boolean }[] = [
-    { label: 'Yes, I did', outcome: 'yes', primary: true },
-    { label: 'Not yet', outcome: 'not_yet' },
-    { label: 'No', outcome: 'no' },
+  const choices: { label: string; match: 'yes' | 'partly' | 'no'; primary?: boolean }[] = [
+    { label: 'Yes, they fit', match: 'yes', primary: true },
+    { label: 'Somewhat', match: 'partly' },
+    { label: 'Not really', match: 'no' },
   ];
 
   return (
     <div
       role="dialog"
       aria-modal="false"
-      aria-label="Was Home Reach helpful?"
+      aria-label="Did these results match your situation?"
       style={{
         position: 'fixed',
         left: '50%',
@@ -100,7 +106,7 @@ export function ReturnSurvey() {
         ×
       </button>
       <p style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, color: '#0D1117', marginBottom: 4, paddingRight: 20 }}>
-        Did Home Reach help you find a home?
+        Did these results match your situation?
       </p>
       <p style={{ fontSize: 13, color: '#64748B', marginBottom: 16 }}>
         Your answer is anonymous and helps us improve.
@@ -108,8 +114,8 @@ export function ReturnSurvey() {
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         {choices.map((c) => (
           <button
-            key={c.outcome}
-            onClick={() => answer(c.outcome)}
+            key={c.match}
+            onClick={() => answer(c.match)}
             style={{
               flex: '1 1 auto',
               minWidth: 96,
