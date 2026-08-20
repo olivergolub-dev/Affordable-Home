@@ -13,6 +13,7 @@ import { AccountNav } from '@/components/AccountNav';
  */
 export const NAV_LINKS: { label: string; href: string }[] = [
   { label: 'Listings', href: '/results' },
+  { label: 'Guide', href: '/guide' },
   { label: 'How it works', href: '/#how' },
   { label: 'Coverage', href: '/#coverage' },
   { label: 'About', href: '/about' },
