@@ -371,6 +371,13 @@ export default function Home() {
             <a href="/results" style={{ color: '#FFFFFF', fontSize: 15, fontWeight: 500, textDecoration: 'none', letterSpacing: '0.02em' }}>
               Browse all listings
             </a>
+            <a
+              href="/guide"
+              onClick={() => posthog.capture('guide_opened', { source: 'hero' })}
+              style={{ color: '#FFFFFF', fontSize: 15, fontWeight: 500, textDecoration: 'none', letterSpacing: '0.02em', border: '1px solid rgba(255,255,255,0.32)', borderRadius: 6, padding: '15px 26px' }}
+            >
+              Free housing guide
+            </a>
           </motion.div>
         </div>
       </section>
