@@ -1,0 +1,40 @@
+# Weekly link-health check for every listing's source_url.
+# See affordable-home-app/scripts/check-links.ts for what it does.
+#
+# The run FAILS (exit 2) when a listing looks gone, so GitHub emails the repo
+# owner about the failed scheduled run — no other alerting required. Optional
+# repo secrets:
+#   SUPABASE_SERVICE_ROLE_KEY  — also writes link_ok / last_checked to the DB
+#   SENDGRID_API_KEY + SENDGRID_FROM_EMAIL — also emails the report
+#   LINK_CHECK_TO_EMAIL        — recipient override
+name: Check listing links
+
+on:
+  schedule:
+    - cron: '0 13 * * 1' # Mondays 13:00 UTC (9am ET)
+  workflow_dispatch:
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: affordable-home-app
+    env:
+      # Public values (already shipped to every browser in the site bundle).
+      NEXT_PUBLIC_SUPABASE_URL: https://wrumpqswcctxtenognls.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
+      LINK_CHECK_TO_EMAIL: ${{ secrets.LINK_CHECK_TO_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: affordable-home-app/package-lock.json
+      - run: npm ci
+      - run: npx --yes tsx scripts/check-links.ts

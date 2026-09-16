@@ -117,6 +117,13 @@ async function main() {
   } else {
     console.log('\nNothing needs action — no email sent.');
   }
+
+  // Non-zero exit when something is likely gone. In GitHub Actions a failed
+  // scheduled run emails the repo owner, so this doubles as a no-SendGrid alert.
+  if (action.length > 0) {
+    console.log(`\nExiting with code 2: ${action.length} listing(s) likely gone — see above.`);
+    process.exit(2);
+  }
 }
 
 main().catch((err) => {
