@@ -14,7 +14,7 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { z } from 'zod';
 import { AMI_BANDS } from '../incomeLimits';
 import { BEDROOM_TOKENS, PRIORITY_GROUPS } from '../types';
-import { ESSEX_MUNICIPALITIES, normalizeMunicipality } from './essex';
+import { ESSEX_MUNICIPALITIES, isIncomeBasedRent, normalizeMunicipality } from './essex';
 import type { Candidate } from './sources';
 
 export const MODEL = 'claude-opus-5';
@@ -45,7 +45,7 @@ export type Extraction = z.infer<typeof ExtractionSchema>;
 
 const SYSTEM = `You extract structured facts about affordable-housing properties for Home Reach, a free directory that helps Essex County, New Jersey households find income-restricted rentals. Real people act on this data, so be accurate and conservative: never guess a rent, a phone number, or an address; leave a field empty or null when the page does not support it. Do follow the stated inference rules for ami_bands and priority_groups, because those are program-level facts.
 
-Directory pages often include county-wide reference tables (Fair Market Rent by bedroom size, HUD income limits by household size). Those are NOT this property's rent or its income bands — ignore them for rent, and use only the program type and property-specific text for ami_bands. A "waitlist open" statement counts only when it is about this property or the authority that manages its waitlist.
+Directory pages often include county-wide reference tables (Fair Market Rent by bedroom size, HUD income limits by household size). Those are NOT this property's rent or its income bands — ignore them for rent, and use only the program type and property-specific text for ami_bands. A "waitlist open" statement counts only when it is about this property or the authority that manages its waitlist. For public housing and Section 8 / voucher programs, rent is a share of household income, so set rent to null even if the page shows an average or estimated figure.
 
 Essex County municipalities: ${ESSEX_MUNICIPALITIES.join(', ')}.
 
@@ -117,6 +117,6 @@ export function sanitize(x: Extraction) {
     ami_bands: [...new Set(ami)].sort((a, b) => a - b),
     bedroom_types: [...new Set(beds)],
     priority_groups: [...new Set(groups)],
-    rent: x.rent != null && Number.isFinite(x.rent) && x.rent > 0 ? Math.round(x.rent) : null,
+    rent: x.rent != null && Number.isFinite(x.rent) && x.rent > 0 && !isIncomeBasedRent(x.program_type) ? Math.round(x.rent) : null,
   };
 }

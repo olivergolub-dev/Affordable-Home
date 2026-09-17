@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { verifyReviewToken, type ReviewAction } from '@/lib/discovery/review';
+import { isIncomeBasedRent } from '@/lib/discovery/essex';
 
 /**
  * One-click approve / reject for listings found by the weekly discovery job.
@@ -75,7 +76,7 @@ export async function GET(req: NextRequest) {
     ['AMI bands', (row.ami_bands as number[]).map((b) => `${b}%`).join(', ')],
     ['Bedrooms', (row.bedroom_types as string[]).join(', ')],
     ['Priority', (row.priority_groups as string[]).join(', ')],
-    ['Rent', row.rent != null ? `$${row.rent}/mo` : 'contact for rent'],
+    ['Rent', row.rent != null && !isIncomeBasedRent(row.program_type as string | null) ? `$${row.rent}/mo` : 'contact for rent (income-based)'],
     ['Phone', row.phone],
     ['Source', row.source],
   ];
@@ -115,6 +116,8 @@ export async function POST(req: NextRequest) {
 
   // Approve: copy into listings (upsert on name+city so a re-approve can't duplicate).
   const listing = Object.fromEntries(LISTING_COLUMNS.map((c) => [c, row[c]]));
+  // Income-based programs: a directory's dollar figure is an average, not the rent.
+  if (isIncomeBasedRent(row.program_type as string | null)) listing.rent = null;
   const { data: inserted, error: insErr } = await admin
     .from('listings')
     .upsert(listing, { onConflict: 'name,city' })

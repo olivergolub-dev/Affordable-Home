@@ -44,3 +44,12 @@ export function normalizeMunicipality(raw: string | null | undefined): EssexMuni
   if (s === 'vailsburg' || s === 'ironbound') s = 'newark';
   return ESSEX_MUNICIPALITIES.find((m) => m.toLowerCase() === s) ?? null;
 }
+
+/**
+ * Programs where rent is set as a share of household income (typically 30%),
+ * so any single dollar figure a directory shows is an average, not a price.
+ * Storing it would give the listing a false "within your budget" score.
+ */
+export function isIncomeBasedRent(programType: string | null | undefined): boolean {
+  return /public housing|section 8|section-8|housing choice|voucher|\bhcv\b|\bpbv\b|\bpbra\b|\brad\b|project-based/i.test(programType ?? '');
+}
