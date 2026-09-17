@@ -111,7 +111,30 @@ async function main() {
       continue;
     }
     const nearby = (existing ?? []).filter((e) => !c.city || e.city === c.city).map((e) => ({ name: e.name, address: e.address, city: e.city }));
-    const result = await extractListing(anthropic, { candidate: c, pageText: htmlToText(html), existing: nearby });
+    let result;
+    try {
+      result = await extractListing(anthropic, { candidate: c, pageText: htmlToText(html), existing: nearby });
+    } catch (err) {
+      // Account-level problems (no credits, bad key) won't fix themselves by
+      // moving on to the next listing — stop with a clear message instead.
+      if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
+        console.error(`\nAnthropic rejected the API key: ${err.message}\nCheck the ANTHROPIC_API_KEY secret.`);
+        process.exit(1);
+      }
+      if (err instanceof Anthropic.BadRequestError && /credit balance/i.test(err.message)) {
+        console.error('\nThe Anthropic account is out of credits. Add credits at https://console.anthropic.com/settings/billing and re-run.');
+        process.exit(1);
+      }
+      if (err instanceof Anthropic.RateLimitError) {
+        console.log(`  ✗ ${c.name} — rate limited, waiting 30s`);
+        await new Promise((r) => setTimeout(r, 30000));
+        failed++;
+        continue;
+      }
+      console.log(`  ✗ ${c.name} — API error: ${(err as Error).message}`);
+      failed++;
+      continue;
+    }
     usage.input += result.usage.input;
     usage.output += result.usage.output;
     if (!result.extraction) {
