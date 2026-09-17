@@ -1,0 +1,46 @@
+# Weekly discovery of new Essex County affordable listings.
+# See affordable-home-app/scripts/discover-listings.ts. New finds go to the
+# pending_listings review queue and are emailed with approve/reject links;
+# nothing is published without a click.
+#
+# Repo secrets: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (required);
+# REVIEW_SECRET, SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, LINK_CHECK_TO_EMAIL.
+# Without SendGrid the run exits 3 when there is something to review, so the
+# failed-run email from GitHub is the alert.
+name: Discover new listings
+
+on:
+  schedule:
+    - cron: '0 14 * * 1' # Mondays 14:00 UTC (10am ET), after the link check
+  workflow_dispatch:
+    inputs:
+      max_new:
+        description: 'Max new listings to process this run'
+        default: '15'
+        required: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: affordable-home-app
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://wrumpqswcctxtenognls.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      REVIEW_SECRET: ${{ secrets.REVIEW_SECRET }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
+      LINK_CHECK_TO_EMAIL: ${{ secrets.LINK_CHECK_TO_EMAIL }}
+      MAX_NEW_PER_RUN: ${{ inputs.max_new || '15' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: affordable-home-app/package-lock.json
+      - run: npm ci
+      - run: npx --yes tsx scripts/discover-listings.ts
