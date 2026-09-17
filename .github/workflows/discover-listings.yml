@@ -18,6 +18,10 @@ on:
         description: 'Max new listings to process this run'
         default: '15'
         required: false
+      email_only:
+        description: 'Skip crawling; just (re)send the review email'
+        type: boolean
+        default: false
 
 jobs:
   discover:
@@ -43,4 +47,4 @@ jobs:
           cache: npm
           cache-dependency-path: affordable-home-app/package-lock.json
       - run: npm ci
-      - run: npx --yes tsx scripts/discover-listings.ts
+      - run: npx --yes tsx scripts/discover-listings.ts ${{ inputs.email_only && '--email-only' || '' }}
