@@ -22,7 +22,11 @@
  *   SITE_URL                                              default https://www.homereach.site
  *   MAX_NEW_PER_RUN                                       default 15
  *
- * Run locally:  npx tsx scripts/discover-listings.ts [--dry-run]
+ * The email always contains the whole outstanding queue (every row still
+ * 'pending'), not just this run's finds, so a failed send never loses anything.
+ *
+ * Run locally:  npx tsx scripts/discover-listings.ts [--dry-run] [--email-only]
+ *               --email-only skips crawling and just (re)sends the queue.
  * In CI:        .github/workflows/discover-listings.yml (Mondays)
  */
 import { readFileSync } from 'node:fs';
@@ -44,6 +48,7 @@ try {
 }
 
 const DRY_RUN = process.argv.includes('--dry-run');
+const EMAIL_ONLY = process.argv.includes('--email-only');
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const MAX_NEW = Number(process.env.MAX_NEW_PER_RUN) || 15;
@@ -61,10 +66,18 @@ if (!process.env.ANTHROPIC_API_KEY) {
 const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
 const anthropic = new Anthropic();
 
+/** Filled by discover() for the email footer. */
+const runStats = { skipped: 0, leftover: 0 };
+
 const normKey = (name: string, city: string) => `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}|${city.toLowerCase()}`;
 const escapeHtml = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
 async function main() {
+  if (!EMAIL_ONLY) await discover();
+  await emailQueue();
+}
+
+async function discover() {
   console.log(`Discovering new Essex County listings (${DRY_RUN ? 'dry run' : 'live'}, max ${MAX_NEW} new)...\n`);
 
   // What we already know about.
@@ -98,7 +111,7 @@ async function main() {
   console.log(`\n${candidates.length} candidates found, ${fresh.length} not seen before. Processing up to ${MAX_NEW}.\n`);
 
   const batch = fresh.slice(0, MAX_NEW);
-  const queued: { id: string; row: Record<string, unknown>; extraction: { confidence: string; notes: string; evidence: string } }[] = [];
+  let queued = 0;
   let skipped = 0;
   let failed = 0;
   const usage = { input: 0, output: 0 };
@@ -183,44 +196,60 @@ async function main() {
     }
 
     if (DRY_RUN) continue;
-    const { data: inserted, error } = await supabase.from('pending_listings').insert(row).select('id').single();
+    const { error } = await supabase.from('pending_listings').insert(row);
     if (error) {
       console.log(`    ! could not save: ${error.message}`);
       failed++;
       continue;
     }
     if (!skipReason) {
-      queued.push({ id: inserted.id, row, extraction: { confidence: x.confidence, notes: x.notes, evidence: x.evidence } });
+      queued++;
       knownNames.add(normKey(row.name, row.city));
     }
   }
 
   const cost = (usage.input * 5 + usage.output * 25) / 1_000_000;
-  console.log(`\nResult: ${queued.length} queued for review · ${skipped} skipped · ${failed} failed · ${fresh.length - batch.length} left for next week.`);
+  runStats.skipped = skipped;
+  runStats.leftover = fresh.length - batch.length;
+  console.log(`\nResult: ${queued} queued for review · ${skipped} skipped · ${failed} failed · ${runStats.leftover} left for next week.`);
   console.log(`Claude usage: ${usage.input} in / ${usage.output} out tokens (${MODEL}, ≈$${cost.toFixed(2)}).`);
 
-  // Tell the reviewer.
+}
+
+async function emailQueue() {
   const sgKey = process.env.SENDGRID_API_KEY;
   const from = process.env.SENDGRID_FROM_EMAIL;
   const to = process.env.LINK_CHECK_TO_EMAIL || 'olivergolub@gmail.com';
   const secret = process.env.REVIEW_SECRET;
 
-  if (queued.length === 0) {
-    console.log('\nNothing new to review — no email sent.');
+  const { data: queue, error } = await supabase
+    .from('pending_listings')
+    .select('*')
+    .eq('status', 'pending')
+    .order('discovered_at', { ascending: true });
+  if (error) {
+    console.error('Could not read the review queue:', error.message);
+    process.exit(1);
+  }
+  const rows = queue ?? [];
+  if (rows.length === 0) {
+    console.log('\nNothing waiting for review — no email sent.');
     return;
   }
+  console.log(`\n${rows.length} listing(s) waiting for review.`);
+  if (DRY_RUN) return;
   if (!sgKey || !from) {
-    console.log('\n(SendGrid not configured — the pending rows are in Supabase → pending_listings. Exiting 3 so the run is flagged.)');
+    console.log('(SendGrid not configured — see Supabase → pending_listings. Exiting 3 so the run is flagged.)');
     process.exit(3);
   }
 
   const link = (id: string, action: 'approve' | 'reject') =>
     secret ? `${SITE_URL}/api/review-listing?id=${id}&action=${action}&token=${reviewToken(secret, id, action)}` : null;
 
-  const cards = queued
-    .map(({ id, row, extraction }) => {
-      const approve = link(id, 'approve');
-      const reject = link(id, 'reject');
+  const cards = rows
+    .map((row) => {
+      const approve = link(row.id, 'approve');
+      const reject = link(row.id, 'reject');
       const facts = [
         ['Program', row.program_type],
         ['Address', row.address],
@@ -238,10 +267,10 @@ async function main() {
       return `
       <div style="border:1px solid #ddd;border-radius:8px;padding:14px;margin:0 0 14px">
         <h3 style="margin:0 0 4px">${escapeHtml(row.name)} <span style="font-weight:normal;color:#666">— ${escapeHtml(row.city)}</span></h3>
-        <div style="font-size:13px;color:#666;margin-bottom:8px">${escapeHtml(row.source)} · confidence: ${escapeHtml(extraction.confidence)} · <a href="${escapeHtml(row.source_url)}">source page</a></div>
+        <div style="font-size:13px;color:#666;margin-bottom:8px">${escapeHtml(row.source)} · confidence: ${escapeHtml(row.confidence)} · found ${new Date(row.discovered_at).toLocaleDateString('en-US')} · <a href="${escapeHtml(row.source_url)}">source page</a></div>
         <table style="font-size:14px;border-collapse:collapse">${facts}</table>
-        <p style="font-size:13px;margin:8px 0"><em>${escapeHtml(extraction.notes)}</em></p>
-        <p style="font-size:12px;color:#555;margin:0 0 10px">Evidence: “${escapeHtml(extraction.evidence)}”</p>
+        <p style="font-size:13px;margin:8px 0"><em>${escapeHtml(row.notes)}</em></p>
+        <p style="font-size:12px;color:#555;margin:0 0 10px">Evidence: “${escapeHtml(row.evidence)}”</p>
         ${
           approve && reject
             ? `<a href="${approve}" style="background:#3D6B4C;color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none;margin-right:8px">Approve — publish</a>
@@ -253,14 +282,21 @@ async function main() {
     .join('');
 
   const html = `
-    <h2>Home Reach — ${queued.length} new listing${queued.length === 1 ? '' : 's'} to review</h2>
-    <p>Found this week from ${SOURCES.map((s) => s.name).join(' and ')}. Nothing is on the site yet — approving publishes it immediately; rejecting hides it for good. Check the source page before approving.</p>
+    <h2>Home Reach — ${rows.length} listing${rows.length === 1 ? '' : 's'} waiting for review</h2>
+    <p>Found by the weekly scan of ${SOURCES.map((s) => s.name).join(' and ')}. Nothing is on the site yet — approving publishes it immediately; rejecting hides it for good. Check the source page before approving.</p>
     ${cards}
-    <p style="color:#555;font-size:13px">${skipped} other new pages were skipped automatically (not Essex County, not income-restricted, or duplicates). ${fresh.length - batch.length} more candidates are queued for next week.</p>`;
+    <p style="color:#555;font-size:13px">${runStats.skipped} other new pages were skipped automatically this run (not Essex County, not income-restricted, or duplicates). ${runStats.leftover} more candidates are queued for next week.</p>`;
 
   sgMail.setApiKey(sgKey);
-  await sgMail.send({ to, from, subject: `Home Reach: ${queued.length} new listing${queued.length === 1 ? '' : 's'} to review`, html });
-  console.log(`\nEmailed ${to}.`);
+  try {
+    await sgMail.send({ to, from, subject: `Home Reach: ${rows.length} listing${rows.length === 1 ? '' : 's'} to review`, html });
+  } catch (err) {
+    const code = (err as { code?: number }).code;
+    console.error(`\nSendGrid rejected the email (${code ?? 'error'}). ${code === 401 || code === 403 ? 'The SENDGRID_API_KEY secret is invalid or revoked — create a new key in SendGrid and update the secret.' : (err as Error).message}`);
+    console.error('The queue is safe in Supabase → pending_listings; re-run with --email-only after fixing.');
+    process.exit(3);
+  }
+  console.log(`Emailed ${to}.`);
 }
 
 main().catch((err) => {
