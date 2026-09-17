@@ -1179,23 +1179,6 @@ export const SEED_LISTINGS: SeedListing[] = [
     last_verified: VERIFIED_4,
   },
   {
-    name: 'Norman Towers',
-    address: '500 N Walnut St',
-    city: 'East Orange',
-    program_type: 'Section 8 Project-Based Rental Assistance (RAD), senior affordable',
-    ami_bands: [50],
-    bedroom_types: ['Studio', '1BR'],
-    rent: null,
-    waitlist_open: false,
-    application_link: null,
-    phone: null,
-    priority_groups: ['senior'],
-    accessible: false,
-    source: 'Affordable Housing Hub',
-    source_url: 'https://search.affordablehousinghub.org/nj/essex/east-orange/section-8-apartments-details/9747/norman-towers',
-    last_verified: VERIFIED_4,
-  },
-  {
     name: 'Doddtown Plaza',
     address: '9 Long St',
     city: 'East Orange',
@@ -2354,21 +2337,24 @@ export const SEED_LISTINGS: SeedListing[] = [
     source_url: 'https://www.piazzanj.com/property/white-rock-heights/',
     last_verified: VERIFIED_5,
   },
+];
+
+/**
+ * Listings removed after the source site dropped them (see scripts/check-links.ts).
+ * ingest.ts deletes these from the DB on every run, so they can't come back via
+ * an old upsert. Keep the entry; it's the record of why the listing is gone.
+ */
+export const RETIRED_LISTINGS: { name: string; city: string; retired: string; reason: string }[] = [
+  {
+    name: 'Norman Towers',
+    city: 'East Orange',
+    retired: '2026-09-16',
+    reason: 'Affordable Housing Hub removed the property page (redirects to the East Orange index, which no longer lists it).',
+  },
   {
     name: '61 Smull Avenue',
-    address: '61 Smull Ave',
     city: 'Caldwell',
-    program_type: 'Affordable Set-Aside (Fair Share)',
-    ami_bands: [50, 80],
-    bedroom_types: ['2BR'],
-    rent: null,
-    waitlist_open: false,
-    application_link: null,
-    phone: '609-786-1100',
-    priority_groups: [],
-    accessible: false,
-    source: 'Fair Share Housing Center',
-    source_url: 'https://www.fairsharehousing.org/rental/61-smull-avenue/',
-    last_verified: VERIFIED_5,
+    retired: '2026-09-16',
+    reason: 'Fair Share Housing Center removed the rental (redirects to /rentals, which no longer lists it).',
   },
 ];

@@ -23,7 +23,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
-import { SEED_LISTINGS, type SeedListing } from './seed-listings';
+import { RETIRED_LISTINGS, SEED_LISTINGS, type SeedListing } from './seed-listings';
 
 // Load .env.local without a dependency.
 function loadEnvLocal() {
@@ -71,7 +71,22 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Done. ${data?.length ?? 0} listings in the table.`);
+  console.log(`Upserted ${data?.length ?? 0} listings.`);
+
+  // Retired listings: the source dropped them, so drop them here too.
+  for (const r of RETIRED_LISTINGS) {
+    const { data: gone, error: delErr } = await admin
+      .from('listings')
+      .delete()
+      .eq('name', r.name)
+      .eq('city', r.city)
+      .select('id');
+    if (delErr) console.warn(`Could not delete ${r.name} (${r.city}): ${delErr.message}`);
+    else if (gone && gone.length > 0) console.log(`Removed ${r.name} (${r.city}) — ${r.reason}`);
+  }
+
+  const { count } = await admin.from('listings').select('id', { count: 'exact', head: true });
+  console.log(`Done. ${count ?? '?'} listings in the table.`);
 }
 
 main().catch((e) => {
