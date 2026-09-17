@@ -1,12 +1,11 @@
 # Weekly discovery of new Essex County affordable listings.
 # See affordable-home-app/scripts/discover-listings.ts. New finds go to the
-# pending_listings review queue and are emailed with approve/reject links;
-# nothing is published without a click.
+# pending_listings review queue and are posted as a GitHub issue (label
+# "listing-review") with approve/reject links; nothing is published without
+# a click. SendGrid email is an optional second channel.
 #
-# Repo secrets: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY (required);
-# REVIEW_SECRET, SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, LINK_CHECK_TO_EMAIL.
-# Without SendGrid the run exits 3 when there is something to review, so the
-# failed-run email from GitHub is the alert.
+# Repo secrets: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, REVIEW_SECRET
+# (required); SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, LINK_CHECK_TO_EMAIL.
 name: Discover new listings
 
 on:
@@ -23,6 +22,10 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   discover:
     runs-on: ubuntu-latest
@@ -35,6 +38,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       REVIEW_SECRET: ${{ secrets.REVIEW_SECRET }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
       LINK_CHECK_TO_EMAIL: ${{ secrets.LINK_CHECK_TO_EMAIL }}

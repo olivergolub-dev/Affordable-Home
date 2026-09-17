@@ -17,7 +17,8 @@
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   required
  *   ANTHROPIC_API_KEY                                     required
  *   REVIEW_SECRET                                         signs approve/reject links
- *   SENDGRID_API_KEY, SENDGRID_FROM_EMAIL                 email the batch
+ *   GITHUB_TOKEN, GITHUB_REPOSITORY                       (set by Actions) post the queue as an issue
+ *   SENDGRID_API_KEY, SENDGRID_FROM_EMAIL                 also email the batch (optional)
  *   LINK_CHECK_TO_EMAIL                                   reviewer (default below)
  *   SITE_URL                                              default https://www.homereach.site
  *   MAX_NEW_PER_RUN                                       default 15
@@ -216,6 +217,97 @@ async function discover() {
 
 }
 
+/** Shared facts table for one queued row (markdown + html renderers below). */
+function factsOf(row: Record<string, unknown>): [string, string][] {
+  return (
+    [
+      ['Program', row.program_type],
+      ['Address', row.address],
+      ['AMI bands', (row.ami_bands as number[]).map((b) => `${b}%`).join(', ') || '—'],
+      ['Bedrooms', (row.bedroom_types as string[]).join(', ') || '—'],
+      ['Priority', (row.priority_groups as string[]).join(', ') || '—'],
+      ['Rent', row.rent != null ? `$${row.rent}/mo` : 'contact for rent'],
+      ['Waitlist open', row.waitlist_open ? 'yes' : 'not stated'],
+      ['Phone', row.phone],
+      ['Accessible', row.accessible ? 'yes' : 'not stated'],
+    ] as [string, unknown][]
+  )
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => [k, String(v)]);
+}
+
+const ISSUE_LABEL = 'listing-review';
+
+/**
+ * Post (or refresh) the review queue as a GitHub issue. Needs only the
+ * Actions-provided GITHUB_TOKEN with `issues: write`; GitHub notifies the repo
+ * owner by email. One open issue is kept up to date rather than one per run.
+ */
+async function postGithubIssue(rows: Record<string, unknown>[], link: (id: string, a: 'approve' | 'reject') => string | null): Promise<boolean> {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY; // owner/name
+  if (!token || !repo) return false;
+
+  const api = async (path: string, init: RequestInit = {}) => {
+    const res = await fetch(`https://api.github.com/repos/${repo}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+        ...(init.headers ?? {}),
+      },
+    });
+    if (!res.ok) throw new Error(`GitHub ${init.method ?? 'GET'} ${path} → ${res.status} ${await res.text()}`);
+    return res.json();
+  };
+
+  const today = new Date().toISOString().slice(0, 10);
+  const cards = rows.map((row) => {
+    const approve = link(String(row.id), 'approve');
+    const reject = link(String(row.id), 'reject');
+    const facts = factsOf(row).map(([k, v]) => `| ${k} | ${v.replace(/\|/g, '/')} |`).join('\n');
+    return `### ${row.name} — ${row.city}
+*${row.source} · confidence: ${row.confidence} · found ${new Date(String(row.discovered_at)).toLocaleDateString('en-US')} · [source page](${row.source_url})*
+
+| | |
+|---|---|
+${facts}
+
+> ${String(row.notes ?? '').replace(/\n/g, ' ')}
+>
+> **Evidence:** “${String(row.evidence ?? '').replace(/\n/g, ' ')}”
+
+${approve && reject ? `**[✅ Approve — publish](${approve})** · [🚫 Reject](${reject})` : '_Set REVIEW_SECRET to get approve/reject links._'}
+`;
+  });
+
+  const body = `${rows.length} listing${rows.length === 1 ? '' : 's'} found by the weekly scan of ${SOURCES.map((s) => s.name).join(' and ')} are waiting for review. **Nothing is on the site yet.** Each link opens a confirmation page; approving publishes immediately, rejecting hides it for good. Glance at the source page before approving.
+
+_Last updated ${today}. ${runStats.skipped} other new pages were skipped automatically this run (not Essex County, not income-restricted, or duplicates); ${runStats.leftover} more candidates are queued for next week._
+
+---
+
+${cards.join('\n---\n\n')}`;
+
+  const title = `Review: ${rows.length} new listing${rows.length === 1 ? '' : 's'} waiting (${today})`;
+  const open = (await api(`/issues?state=open&labels=${ISSUE_LABEL}&per_page=1`)) as { number: number }[];
+  if (open.length > 0) {
+    const n = open[0].number;
+    await api(`/issues/${n}`, { method: 'PATCH', body: JSON.stringify({ title, body }) });
+    await api(`/issues/${n}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ body: `Queue refreshed ${today}: ${rows.length} listing${rows.length === 1 ? '' : 's'} waiting. See the updated list above.` }),
+    });
+    console.log(`Updated GitHub issue #${n}.`);
+  } else {
+    const created = (await api('/issues', { method: 'POST', body: JSON.stringify({ title, body, labels: [ISSUE_LABEL] }) })) as { number: number; html_url: string };
+    console.log(`Opened GitHub issue #${created.number}: ${created.html_url}`);
+  }
+  return true;
+}
+
 async function emailQueue() {
   const sgKey = process.env.SENDGRID_API_KEY;
   const from = process.env.SENDGRID_FROM_EMAIL;
@@ -231,43 +323,38 @@ async function emailQueue() {
     console.error('Could not read the review queue:', error.message);
     process.exit(1);
   }
-  const rows = queue ?? [];
+  const rows = (queue ?? []) as Record<string, unknown>[];
   if (rows.length === 0) {
-    console.log('\nNothing waiting for review — no email sent.');
+    console.log('\nNothing waiting for review.');
     return;
   }
   console.log(`\n${rows.length} listing(s) waiting for review.`);
   if (DRY_RUN) return;
-  if (!sgKey || !from) {
-    console.log('(SendGrid not configured — see Supabase → pending_listings. Exiting 3 so the run is flagged.)');
-    process.exit(3);
-  }
 
   const link = (id: string, action: 'approve' | 'reject') =>
     secret ? `${SITE_URL}/api/review-listing?id=${id}&action=${action}&token=${reviewToken(secret, id, action)}` : null;
 
-  const cards = rows
-    .map((row) => {
-      const approve = link(row.id, 'approve');
-      const reject = link(row.id, 'reject');
-      const facts = [
-        ['Program', row.program_type],
-        ['Address', row.address],
-        ['AMI bands', (row.ami_bands as number[]).map((b) => `${b}%`).join(', ') || '—'],
-        ['Bedrooms', (row.bedroom_types as string[]).join(', ') || '—'],
-        ['Priority', (row.priority_groups as string[]).join(', ') || '—'],
-        ['Rent', row.rent != null ? `$${row.rent}/mo` : 'contact for rent'],
-        ['Waitlist open', row.waitlist_open ? 'yes' : 'not stated'],
-        ['Phone', row.phone],
-        ['Accessible', row.accessible ? 'yes' : 'not stated'],
-      ]
-        .filter(([, v]) => v != null && v !== '')
-        .map(([k, v]) => `<tr><td style="color:#666;padding:2px 10px 2px 0">${k}</td><td>${escapeHtml(v)}</td></tr>`)
-        .join('');
-      return `
+  // Primary channel: a GitHub issue (no secrets needed in Actions).
+  let notified = false;
+  try {
+    notified = await postGithubIssue(rows, link);
+  } catch (err) {
+    console.error(`Could not post the GitHub issue: ${(err as Error).message}`);
+  }
+
+  // Optional second channel: email via SendGrid.
+  if (sgKey && from) {
+    const cards = rows
+      .map((row) => {
+        const approve = link(String(row.id), 'approve');
+        const reject = link(String(row.id), 'reject');
+        const facts = factsOf(row)
+          .map(([k, v]) => `<tr><td style="color:#666;padding:2px 10px 2px 0">${k}</td><td>${escapeHtml(v)}</td></tr>`)
+          .join('');
+        return `
       <div style="border:1px solid #ddd;border-radius:8px;padding:14px;margin:0 0 14px">
         <h3 style="margin:0 0 4px">${escapeHtml(row.name)} <span style="font-weight:normal;color:#666">— ${escapeHtml(row.city)}</span></h3>
-        <div style="font-size:13px;color:#666;margin-bottom:8px">${escapeHtml(row.source)} · confidence: ${escapeHtml(row.confidence)} · found ${new Date(row.discovered_at).toLocaleDateString('en-US')} · <a href="${escapeHtml(row.source_url)}">source page</a></div>
+        <div style="font-size:13px;color:#666;margin-bottom:8px">${escapeHtml(row.source)} · confidence: ${escapeHtml(row.confidence)} · <a href="${escapeHtml(row.source_url)}">source page</a></div>
         <table style="font-size:14px;border-collapse:collapse">${facts}</table>
         <p style="font-size:13px;margin:8px 0"><em>${escapeHtml(row.notes)}</em></p>
         <p style="font-size:12px;color:#555;margin:0 0 10px">Evidence: “${escapeHtml(row.evidence)}”</p>
@@ -278,25 +365,28 @@ async function emailQueue() {
             : `<span style="font-size:12px;color:#98493F">Set REVIEW_SECRET to get one-click approve/reject links.</span>`
         }
       </div>`;
-    })
-    .join('');
-
-  const html = `
+      })
+      .join('');
+    const html = `
     <h2>Home Reach — ${rows.length} listing${rows.length === 1 ? '' : 's'} waiting for review</h2>
-    <p>Found by the weekly scan of ${SOURCES.map((s) => s.name).join(' and ')}. Nothing is on the site yet — approving publishes it immediately; rejecting hides it for good. Check the source page before approving.</p>
+    <p>Found by the weekly scan of ${SOURCES.map((s) => s.name).join(' and ')}. Nothing is on the site yet — each link opens a confirmation page. Check the source page before approving.</p>
     ${cards}
-    <p style="color:#555;font-size:13px">${runStats.skipped} other new pages were skipped automatically this run (not Essex County, not income-restricted, or duplicates). ${runStats.leftover} more candidates are queued for next week.</p>`;
+    <p style="color:#555;font-size:13px">${runStats.skipped} other new pages were skipped automatically this run. ${runStats.leftover} more candidates are queued for next week.</p>`;
+    sgMail.setApiKey(sgKey);
+    try {
+      await sgMail.send({ to, from, subject: `Home Reach: ${rows.length} listing${rows.length === 1 ? '' : 's'} to review`, html });
+      console.log(`Emailed ${to}.`);
+      notified = true;
+    } catch (err) {
+      const code = (err as { code?: number }).code;
+      console.warn(`SendGrid rejected the email (${code ?? 'error'})${code === 401 || code === 403 ? ' — the SENDGRID_API_KEY secret is invalid or revoked.' : '.'}`);
+    }
+  }
 
-  sgMail.setApiKey(sgKey);
-  try {
-    await sgMail.send({ to, from, subject: `Home Reach: ${rows.length} listing${rows.length === 1 ? '' : 's'} to review`, html });
-  } catch (err) {
-    const code = (err as { code?: number }).code;
-    console.error(`\nSendGrid rejected the email (${code ?? 'error'}). ${code === 401 || code === 403 ? 'The SENDGRID_API_KEY secret is invalid or revoked — create a new key in SendGrid and update the secret.' : (err as Error).message}`);
-    console.error('The queue is safe in Supabase → pending_listings; re-run with --email-only after fixing.');
+  if (!notified) {
+    console.error('\nNo notification channel worked. The queue is safe in Supabase → pending_listings. Exiting 3 so the run is flagged.');
     process.exit(3);
   }
-  console.log(`Emailed ${to}.`);
 }
 
 main().catch((err) => {

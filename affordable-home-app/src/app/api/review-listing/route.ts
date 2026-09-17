@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { verifyReviewToken, type ReviewAction } from '@/lib/discovery/review';
 
 /**
  * One-click approve / reject for listings found by the weekly discovery job.
  * Links are minted by scripts/discover-listings.ts and signed with
  * REVIEW_SECRET, so only the reviewer who receives the email can act on them.
+ *
+ * GET shows a confirmation page; the action itself runs on POST. That way a
+ * mail client, link scanner or chat preview that quietly fetches the URL can't
+ * publish anything — a person has to press the button.
  *
  * Approve copies the pending row into `listings` (live immediately).
  * Reject just marks it, so the job never surfaces that page again.
@@ -28,7 +32,10 @@ function page(title: string, body: string, status = 200) {
   return new NextResponse(html, { status, headers: { 'content-type': 'text/html; charset=utf-8' } });
 }
 
-export async function GET(req: NextRequest) {
+type Ctx = { id: string; action: ReviewAction; token: string; admin: SupabaseClient; row: Record<string, unknown> };
+
+/** Validate config + link, load the pending row. Returns a response on any problem. */
+async function load(params: URLSearchParams | FormData): Promise<Ctx | NextResponse> {
   const secret = process.env.REVIEW_SECRET;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,9 +43,9 @@ export async function GET(req: NextRequest) {
     return page('Review links are not set up', '<p>REVIEW_SECRET and SUPABASE_SERVICE_ROLE_KEY need to be set on the server.</p>', 503);
   }
 
-  const id = req.nextUrl.searchParams.get('id') ?? '';
-  const action = req.nextUrl.searchParams.get('action') as ReviewAction | null;
-  const token = req.nextUrl.searchParams.get('token') ?? '';
+  const id = String(params.get('id') ?? '');
+  const action = params.get('action') as ReviewAction | null;
+  const token = String(params.get('token') ?? '');
   if (!/^[0-9a-f-]{36}$/.test(id) || (action !== 'approve' && action !== 'reject') || !verifyReviewToken(secret, id, action, token)) {
     return page('Invalid link', '<p>This review link is missing something or has been tampered with.</p>', 400);
   }
@@ -52,6 +59,52 @@ export async function GET(req: NextRequest) {
   if (row.status !== 'pending') {
     return page('Already reviewed', `<p>${label} was already marked <strong>${escape(row.status)}</strong>${row.reviewed_at ? ` on ${new Date(row.reviewed_at).toLocaleDateString('en-US')}` : ''}.</p>`);
   }
+  return { id, action, token, admin, row };
+}
+
+/** Confirmation page. Nothing changes until the form below is submitted. */
+export async function GET(req: NextRequest) {
+  const ctx = await load(req.nextUrl.searchParams);
+  if (ctx instanceof NextResponse) return ctx;
+  const { id, action, token, row } = ctx;
+
+  const facts: [string, unknown][] = [
+    ['Town', row.city],
+    ['Address', row.address],
+    ['Program', row.program_type],
+    ['AMI bands', (row.ami_bands as number[]).map((b) => `${b}%`).join(', ')],
+    ['Bedrooms', (row.bedroom_types as string[]).join(', ')],
+    ['Priority', (row.priority_groups as string[]).join(', ')],
+    ['Rent', row.rent != null ? `$${row.rent}/mo` : 'contact for rent'],
+    ['Phone', row.phone],
+    ['Source', row.source],
+  ];
+  const table = facts
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => `<tr><td style="color:#666;padding:3px 12px 3px 0">${escape(k)}</td><td>${escape(v)}</td></tr>`)
+    .join('');
+  const verb = action === 'approve' ? 'Publish' : 'Reject';
+  const color = action === 'approve' ? '#3D6B4C' : '#98493F';
+  return page(
+    `${verb} ${escape(row.name)}?`,
+    `<table style="border-collapse:collapse;margin:12px 0">${table}</table>
+     <p><a href="${escape(row.source_url)}" target="_blank" rel="noopener">Open the source page ↗</a></p>
+     <p style="font-size:14px;color:#555"><em>${escape(row.notes)}</em></p>
+     <form method="post" style="margin-top:20px">
+       <input type="hidden" name="id" value="${escape(id)}">
+       <input type="hidden" name="action" value="${escape(action)}">
+       <input type="hidden" name="token" value="${escape(token)}">
+       <button type="submit" style="background:${color};color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer">${verb}${action === 'approve' ? ' — put it on the site' : ' — never show again'}</button>
+     </form>`,
+  );
+}
+
+/** The action itself. */
+export async function POST(req: NextRequest) {
+  const ctx = await load(await req.formData());
+  if (ctx instanceof NextResponse) return ctx;
+  const { id, action, admin, row } = ctx;
+  const label = `<strong>${escape(row.name)}</strong> (${escape(row.city)})`;
 
   const now = new Date().toISOString();
   if (action === 'reject') {
