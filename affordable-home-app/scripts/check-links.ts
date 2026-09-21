@@ -110,8 +110,15 @@ async function main() {
         ${review.map((r) => row(r, 'REVIEW')).join('')}
       </table>` : ''}
       <p style="color:#555;font-size:13px;margin-top:16px;">To remove one: delete its entry in scripts/seed-listings.ts, then run <code>npx tsx scripts/ingest.ts</code> (or set it aside in the DB). REVIEW = the page still loads but no longer names the property (often just a generic directory page) — check before removing. The ${info.length} "couldn't verify" are usually sites that block bots (403) or a temporary error — no action needed.</p>`;
-    await sgMail.send({ to, from, subject: `Home Reach link check: ${action.length} likely gone, ${review.length} to review`, html });
-    console.log(`\nEmailed the report to ${to}.`);
+    try {
+      await sgMail.send({ to, from, subject: `Home Reach link check: ${action.length} likely gone, ${review.length} to review`, html });
+      console.log(`\nEmailed the report to ${to}.`);
+    } catch (err) {
+      // Email is a convenience; the report above and the exit code are the
+      // real signal. Don't let a bad SendGrid key turn "all fine" into red.
+      const code = (err as { code?: number }).code;
+      console.warn(`\nCould not email the report (SendGrid ${code ?? 'error'})${code === 401 || code === 403 ? ' — the SENDGRID_API_KEY secret is invalid or revoked.' : '.'}`);
+    }
   } else if (worthEmailing) {
     console.log('\n(SendGrid not configured — report is above; no email sent.)');
   } else {

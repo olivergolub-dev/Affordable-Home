@@ -920,7 +920,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/hampton-valley-apartments-24012-lihtc',
     last_verified: VERIFIED_4,
   },
   {
@@ -1090,7 +1090,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/weequahic-park-apartments-iii-23858-lihtc',
     last_verified: VERIFIED_4,
   },
   {
@@ -1107,7 +1107,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/aspen-riverpark-apartments-23404-lihtc',
     last_verified: VERIFIED_4,
   },
   {
@@ -1141,7 +1141,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/betty-shabazz-village-3197-public-housing',
     last_verified: VERIFIED_4,
   },
   {
@@ -1158,7 +1158,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/james-c-white-manor-8987-public-housing',
     last_verified: VERIFIED_4,
   },
   {
@@ -1175,7 +1175,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     priority_groups: [],
     accessible: false,
     source: 'Affordable Housing Hub',
-    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark',
+    source_url: 'https://affordablehousinghub.org/housing/new-jersey/essex/newark/felix-fuld-30645-public-housing',
     last_verified: VERIFIED_4,
   },
   {
