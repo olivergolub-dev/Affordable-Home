@@ -243,12 +243,11 @@ const ISSUE_LABEL = 'listing-review';
  * Actions-provided GITHUB_TOKEN with `issues: write`; GitHub notifies the repo
  * owner by email. One open issue is kept up to date rather than one per run.
  */
-async function postGithubIssue(rows: Record<string, unknown>[], link: (id: string, a: 'approve' | 'reject') => string | null): Promise<boolean> {
+function githubApi() {
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPOSITORY; // owner/name
-  if (!token || !repo) return false;
-
-  const api = async (path: string, init: RequestInit = {}) => {
+  if (!token || !repo) return null;
+  return async (path: string, init: RequestInit = {}) => {
     const res = await fetch(`https://api.github.com/repos/${repo}${path}`, {
       ...init,
       headers: {
@@ -262,6 +261,24 @@ async function postGithubIssue(rows: Record<string, unknown>[], link: (id: strin
     if (!res.ok) throw new Error(`GitHub ${init.method ?? 'GET'} ${path} → ${res.status} ${await res.text()}`);
     return res.json();
   };
+}
+
+/** Queue is empty: close the open review issue so it doesn't list stale links. */
+async function closeGithubIssue() {
+  const api = githubApi();
+  if (!api) return;
+  const open = (await api(`/issues?state=open&labels=${ISSUE_LABEL}&per_page=1`)) as { number: number }[];
+  for (const { number: n } of open) {
+    const today = new Date().toISOString().slice(0, 10);
+    await api(`/issues/${n}/comments`, { method: 'POST', body: JSON.stringify({ body: `Every listing has been reviewed (${today}). Closing; a new issue opens when the scan finds more.` }) });
+    await api(`/issues/${n}`, { method: 'PATCH', body: JSON.stringify({ state: 'closed', state_reason: 'completed' }) });
+    console.log(`Closed GitHub issue #${n}.`);
+  }
+}
+
+async function postGithubIssue(rows: Record<string, unknown>[], link: (id: string, a: 'approve' | 'reject') => string | null): Promise<boolean> {
+  const api = githubApi();
+  if (!api) return false;
 
   const today = new Date().toISOString().slice(0, 10);
   const cards = rows.map((row) => {
@@ -326,6 +343,13 @@ async function emailQueue() {
   const rows = (queue ?? []) as Record<string, unknown>[];
   if (rows.length === 0) {
     console.log('\nNothing waiting for review.');
+    if (!DRY_RUN) {
+      try {
+        await closeGithubIssue();
+      } catch (err) {
+        console.error(`Could not close the GitHub issue: ${(err as Error).message}`);
+      }
+    }
     return;
   }
   console.log(`\n${rows.length} listing(s) waiting for review.`);
