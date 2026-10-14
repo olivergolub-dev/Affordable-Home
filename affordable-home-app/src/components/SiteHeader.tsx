@@ -7,7 +7,7 @@ import { AccountNav } from '@/components/AccountNav';
 
 /**
  * Site-wide navigation. Single source of truth for the top-nav links, shared
- * by the homepage and every content page (About, Privacy, Advisors) so the nav
+ * by the homepage and every content page (About, Privacy, Advisors, Press) so the nav
  * is identical everywhere and edited in one place. The `hide-mobile` /
  * `show-mobile` classes (globals.css) drive the responsive menu.
  */
@@ -18,6 +18,7 @@ export const NAV_LINKS: { label: string; href: string }[] = [
   { label: 'Coverage', href: '/#coverage' },
   { label: 'About', href: '/about' },
   { label: 'Advisors', href: '/advisors' },
+  { label: 'Press', href: '/press' },
   { label: 'Data sources', href: '/about#sources' },
   { label: 'Privacy', href: '/privacy' },
 ];

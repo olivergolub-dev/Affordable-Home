@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // "Essex County section 8 waitlist" lands here, not on the homepage.
     { url: `${SITE_URL}/guide`, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/press`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
     // Wizard steps are intentionally excluded — see robots: noindex in
     // src/app/wizard/layout.tsx (session-scoped flow, no standalone content).
