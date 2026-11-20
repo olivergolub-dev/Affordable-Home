@@ -196,6 +196,10 @@ export default function ResultsPage() {
   const [bedroomFilter, setBedroomFilter] = useState<BedroomToken | 'All'>('All');
   const [amiFilter, setAmiFilter] = useState<AmiBand | 'All'>('All');
   const [townFilter, setTownFilter] = useState<string>('All');
+  // waitlist_open is only true when a source clearly says the list is open, so
+  // "not open" often means "unknown". Those listings stay visible by default
+  // (sorted after the open ones); this lets a user hide them.
+  const [showClosed, setShowClosed] = useState(true);
 
   // Hydrate from sessionStorage + URL once, after mount. This is what makes a
   // hard refresh / bookmark of /results keep the personalized "for me" view:
@@ -298,16 +302,21 @@ export default function ResultsPage() {
   }, [listings, townFilter]);
 
   const filtered = useMemo(() => {
-    return base.filter(({ listing }) => {
-      const bedroomMatch =
-        bedroomFilter === 'All' ||
-        listing.bedroom_types.length === 0 ||
-        listing.bedroom_types.includes(bedroomFilter);
-      const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
-      const townMatch = townFilter === 'All' || listing.city === townFilter;
-      return bedroomMatch && amiMatch && townMatch;
-    });
-  }, [base, bedroomFilter, amiFilter, townFilter]);
+    return base
+      .filter(({ listing }) => {
+        const bedroomMatch =
+          bedroomFilter === 'All' ||
+          listing.bedroom_types.length === 0 ||
+          listing.bedroom_types.includes(bedroomFilter);
+        const amiMatch = amiFilter === 'All' || listing.ami_bands.length === 0 || listing.ami_bands.includes(amiFilter);
+        const townMatch = townFilter === 'All' || listing.city === townFilter;
+        const waitlistMatch = showClosed || listing.waitlist_open;
+        return bedroomMatch && amiMatch && townMatch && waitlistMatch;
+      })
+      // Open waitlists first. Sort is stable, so fit-score (or name) order is
+      // kept within each group.
+      .sort((a, b) => Number(b.listing.waitlist_open) - Number(a.listing.waitlist_open));
+  }, [base, bedroomFilter, amiFilter, townFilter, showClosed]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
@@ -403,6 +412,15 @@ export default function ResultsPage() {
               {amiFilterOptions.map((o) => <option key={o.label} value={o.band}>{o.label}</option>)}
             </select>
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, color: '#334155', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showClosed}
+              onChange={(e) => { setShowClosed(e.target.checked); posthog.capture('results_filter_changed', { filter: 'Show closed waitlists', value: e.target.checked }); }}
+              style={{ width: 15, height: 15, accentColor: '#1E40AF', cursor: 'pointer' }}
+            />
+            Show closed waitlists
+          </label>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
             {hasProfile && <SaveResultsButton answers={answers} loggedIn={loggedIn} />}
             <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
@@ -477,6 +495,11 @@ export default function ResultsPage() {
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
                         <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: 18, fontWeight: 400, color: '#0D1117' }}>{listing.name}</span>
                         <span style={{ fontSize: 13, color: '#64748B' }}>{listing.city}</span>
+                        {listing.waitlist_open && (
+                          <span style={{ fontSize: 11, fontWeight: 600, color: '#1E40AF', backgroundColor: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: 4, padding: '2px 8px', alignSelf: 'center' }}>
+                            Waitlist open
+                          </span>
+                        )}
                       </div>
                       <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#334155', marginBottom: reasons.length ? 8 : 0, flexWrap: 'wrap' }}>
                         <span>{formatRent(listing.rent)}</span>
